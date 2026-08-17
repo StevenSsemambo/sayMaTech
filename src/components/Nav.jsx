@@ -25,8 +25,13 @@ export default function Nav() {
       }`}
     >
       <nav className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
-        <a href="#top" className="font-display font-bold text-lg tracking-tight text-ink focus-ring">
-          SayMy<span className="text-terracotta">Tech</span>
+        <a href="#top" className="focus-ring flex items-baseline gap-2">
+          <span className="font-display font-bold text-lg tracking-tight text-ink">
+            SayMy<span className="text-terracotta">Tech</span>
+          </span>
+          <span className="hidden sm:inline text-xs font-mono text-ink/40 tracking-wide">
+            It's Your Tech
+          </span>
         </a>
         <div className="hidden md:flex items-center gap-8">
           {links.map((l) => (

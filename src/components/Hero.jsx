@@ -30,6 +30,15 @@ export default function Hero() {
         </motion.h1>
 
         <motion.p
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.15 }}
+          className="mt-5 font-mono text-sm tracking-widest uppercase text-terracotta-soft"
+        >
+          It's Your Tech
+        </motion.p>
+
+        <motion.p
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}

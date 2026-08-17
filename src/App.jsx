@@ -5,6 +5,7 @@ import KitengeDivider from './components/KitengeDivider'
 import Products from './components/Products'
 import Process from './components/Process'
 import About from './components/About'
+import VisionMission from './components/VisionMission'
 import Contact from './components/Contact'
 import Footer from './components/Footer'
 import AskSayMyTech from './components/AskSayMyTech'
@@ -19,6 +20,7 @@ export default function App() {
       <Products />
       <Process />
       <About />
+      <VisionMission />
       <KitengeDivider color="#E8622C" bg="#FDF8F0" />
       <Contact />
       <Footer />
