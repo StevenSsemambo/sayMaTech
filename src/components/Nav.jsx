@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
+import { Link, NavLink } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 
 const links = [
-  { href: '#work', label: 'For Businesses' },
-  { href: '#products', label: 'Our Products' },
-  { href: '#about', label: 'About' },
-  { href: '#contact', label: 'Start a Project' },
+  { href: '/services', label: 'For Businesses' },
+  { href: '/products', label: 'Our Products' },
+  { href: '/about', label: 'About' },
 ]
 
 export default function Nav() {
@@ -25,24 +25,34 @@ export default function Nav() {
       }`}
     >
       <nav className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
-        <a href="#top" className="focus-ring flex items-baseline gap-2">
+        <Link to="/" className="focus-ring flex items-baseline gap-2">
           <span className="font-display font-bold text-lg tracking-tight text-ink">
             SayMy<span className="text-terracotta">Tech</span>
           </span>
           <span className="hidden sm:inline text-xs font-mono text-ink/40 tracking-wide">
             It's Your Tech
           </span>
-        </a>
+        </Link>
         <div className="hidden md:flex items-center gap-8">
           {links.map((l) => (
-            <a
+            <NavLink
               key={l.href}
-              href={l.href}
-              className="text-sm font-medium text-ink/80 hover:text-terracotta transition-colors focus-ring"
+              to={l.href}
+              className={({ isActive }) =>
+                `text-sm font-medium transition-colors focus-ring ${
+                  isActive ? 'text-terracotta' : 'text-ink/80 hover:text-terracotta'
+                }`
+              }
             >
               {l.label}
-            </a>
+            </NavLink>
           ))}
+          <Link
+            to="/contact"
+            className="focus-ring text-sm font-medium bg-ink text-ivory px-4 py-2 rounded-lg hover:bg-ink-soft transition-colors"
+          >
+            Start a Project
+          </Link>
         </div>
         <button
           className="md:hidden text-ink focus-ring"
@@ -56,15 +66,18 @@ export default function Nav() {
       {open && (
         <div className="md:hidden bg-ivory border-t border-ink/10 px-6 py-4 flex flex-col gap-4">
           {links.map((l) => (
-            <a
+            <NavLink
               key={l.href}
-              href={l.href}
+              to={l.href}
               onClick={() => setOpen(false)}
               className="text-sm font-medium text-ink/80"
             >
               {l.label}
-            </a>
+            </NavLink>
           ))}
+          <Link to="/contact" onClick={() => setOpen(false)} className="text-sm font-medium text-terracotta">
+            Start a Project
+          </Link>
         </div>
       )}
     </header>

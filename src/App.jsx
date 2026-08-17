@@ -1,30 +1,21 @@
-import Nav from './components/Nav'
-import Hero from './components/Hero'
-import DualPath from './components/DualPath'
-import KitengeDivider from './components/KitengeDivider'
-import Products from './components/Products'
-import Process from './components/Process'
-import About from './components/About'
-import VisionMission from './components/VisionMission'
-import Contact from './components/Contact'
-import Footer from './components/Footer'
-import AskSayMyTech from './components/AskSayMyTech'
+import { Routes, Route } from 'react-router-dom'
+import Layout from './components/Layout'
+import HomePage from './pages/HomePage'
+import ProductsPage from './pages/ProductsPage'
+import ServicesPage from './pages/ServicesPage'
+import AboutPage from './pages/AboutPage'
+import ContactPage from './pages/ContactPage'
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-ivory">
-      <Nav />
-      <Hero />
-      <DualPath />
-      <KitengeDivider color="#0B1F1A" bg="#F1E9D8" flip />
-      <Products />
-      <Process />
-      <About />
-      <VisionMission />
-      <KitengeDivider color="#E8622C" bg="#FDF8F0" />
-      <Contact />
-      <Footer />
-      <AskSayMyTech />
-    </div>
+    <Routes>
+      <Route element={<Layout />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/products" element={<ProductsPage />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+      </Route>
+    </Routes>
   )
 }

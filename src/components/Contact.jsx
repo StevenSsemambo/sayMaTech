@@ -13,7 +13,7 @@ export default function Contact() {
   }
 
   return (
-    <section id="contact" className="bg-terracotta px-6 py-24 relative overflow-hidden">
+    <section id="contact" className="bg-terracotta px-6 pt-40 pb-24 relative overflow-hidden">
       <div className="absolute -bottom-20 -right-20 w-72 h-72 rounded-full bg-gold/20 blur-3xl" />
       <div className="max-w-3xl mx-auto relative">
         <motion.div

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { Briefcase, Rocket, ArrowUpRight } from 'lucide-react'
 
 export default function DualPath() {
@@ -20,9 +21,9 @@ export default function DualPath() {
               for businesses that need something that actually works for their users, not just the demo.
             </p>
           </div>
-          <a href="#contact" className="focus-ring mt-8 inline-flex items-center gap-1 text-gold font-medium">
+          <Link to="/contact" className="focus-ring mt-8 inline-flex items-center gap-1 text-gold font-medium">
             Start a project <ArrowUpRight size={16} />
-          </a>
+          </Link>
         </motion.div>
 
         <motion.div
@@ -40,9 +41,9 @@ export default function DualPath() {
               and more — built to solve real problems for real people, wherever they are.
             </p>
           </div>
-          <a href="#products" className="focus-ring mt-8 inline-flex items-center gap-1 text-ivory font-medium">
+          <Link to="/products" className="focus-ring mt-8 inline-flex items-center gap-1 text-ivory font-medium">
             Browse products <ArrowUpRight size={16} />
-          </a>
+          </Link>
         </motion.div>
       </div>
     </section>

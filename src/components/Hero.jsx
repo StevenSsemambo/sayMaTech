@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import { ArrowRight, Sparkles, Globe2 } from 'lucide-react'
 
 export default function Hero() {
@@ -55,18 +56,18 @@ export default function Hero() {
           transition={{ duration: 0.7, delay: 0.3 }}
           className="mt-10 flex flex-wrap gap-4"
         >
-          <a
-            href="#contact"
+          <Link
+            to="/contact"
             className="focus-ring inline-flex items-center gap-2 bg-terracotta hover:bg-terracotta-soft text-ivory font-medium px-6 py-3.5 rounded-xl transition-colors"
           >
             Start a project <ArrowRight size={18} />
-          </a>
-          <a
-            href="#products"
+          </Link>
+          <Link
+            to="/products"
             className="focus-ring inline-flex items-center gap-2 border border-ivory/25 hover:border-ivory/50 text-ivory font-medium px-6 py-3.5 rounded-xl transition-colors"
           >
             See what we've built
-          </a>
+          </Link>
         </motion.div>
 
         <motion.div
