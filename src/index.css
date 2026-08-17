@@ -1,0 +1,56 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #0B1F1A;
+  --color-ink-soft: #12291F;
+  --color-terracotta: #E8622C;
+  --color-terracotta-soft: #F2895A;
+  --color-gold: #F2B705;
+  --color-savanna: #1B6B4A;
+  --color-ivory: #FDF8F0;
+  --color-ivory-dim: #F1E9D8;
+  --color-text-dark: #151515;
+
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: var(--color-ivory);
+    color: var(--color-text-dark);
+    font-family: var(--font-body);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Kitenge-edge diagonal divider */
+.kitenge-divider {
+  position: relative;
+  height: 40px;
+  overflow: hidden;
+}
+.kitenge-divider svg {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.focus-ring:focus-visible {
+  outline: 3px solid var(--color-gold);
+  outline-offset: 3px;
+}
