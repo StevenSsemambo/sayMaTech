@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion'
 
 const steps = [
-  { title: 'Understand the reality', desc: 'We start with how your users actually work — connectivity, devices, language — not a generic spec sheet.' },
-  { title: 'Design for constraints', desc: 'Offline-first architecture and interface decisions made upfront, not patched on later.' },
+  { title: 'Understand the real problem', desc: 'We start with how your users actually live and work, not a generic spec sheet.' },
+  { title: 'Design around it', desc: 'Architecture and interface decisions made for the real problem upfront, not patched on later.' },
   { title: 'Build and integrate AI where it earns its place', desc: 'AI features that solve a real problem for your users, not a badge on the homepage.' },
   { title: 'Ship, then keep it running', desc: 'Deployed, monitored, and supported — with room to grow as your users do.' },
 ]

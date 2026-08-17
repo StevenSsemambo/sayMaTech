@@ -2,15 +2,15 @@ import { motion } from 'framer-motion'
 import { ArrowUpRight } from 'lucide-react'
 
 const products = [
-  { name: 'EliAi — Elimu Learn', tag: 'Education', desc: 'Offline-first learning companion for Ugandan S1–S6 students.' },
-  { name: 'StudyFellow', tag: 'Education / AI', desc: 'AI video learning companion built for African classrooms.' },
-  { name: 'YoSacco', tag: 'Finance', desc: 'Offline-first SACCO management for Emyooga, PDM and OWC groups.' },
-  { name: 'ProfitMind AI', tag: 'Retail', desc: 'Offline POS, stock and finance with a rule-based AI advisor.' },
-  { name: 'SayMyDoc', tag: 'Health', desc: 'Offline health companion built for low-connectivity Uganda.' },
+  { name: 'EliAi — Elimu Learn', tag: 'Education', desc: 'Offline-capable learning companion for secondary school students.' },
+  { name: 'StudyFellow', tag: 'Education / AI', desc: 'AI video learning companion that adapts to how students actually learn.' },
+  { name: 'YoSacco', tag: 'Finance', desc: 'Savings and cooperative group management, built for shared community finance.' },
+  { name: 'ProfitMind AI', tag: 'Retail', desc: 'POS, stock and finance with a rule-based AI advisor for small businesses.' },
+  { name: 'SayMyDoc', tag: 'Health', desc: 'A health companion built for low-connectivity, everyday use.' },
   { name: 'GasWatch Pro', tag: 'IoT', desc: 'Real-time LPG monitoring to prevent gas leaks and outages.' },
-  { name: 'Leafy', tag: 'Messaging', desc: 'A WhatsApp-style messaging PWA built for low-bandwidth use.' },
+  { name: 'Leafy', tag: 'Messaging', desc: 'A fast, lightweight messaging app built for low-bandwidth conditions.' },
   { name: 'YoSpeech', tag: 'Wellness', desc: 'Speech coaching for stuttering and confident public speaking.' },
-  { name: 'PipStart', tag: 'Finance / Education', desc: 'Forex education localised for African traders.' },
+  { name: 'PipStart', tag: 'Finance / Education', desc: 'Practical forex education for everyday traders.' },
 ]
 
 export default function Products() {
@@ -29,7 +29,7 @@ export default function Products() {
             Real products, already in people's hands.
           </h2>
           <p className="mt-4 text-ink/60 leading-relaxed">
-            Every one of these ships as an offline-first PWA — proof of how we build, not just what we say.
+            Every one of these ships solving a real, everyday problem — proof of how we build, not just what we say.
           </p>
         </motion.div>
 

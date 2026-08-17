@@ -16,8 +16,8 @@ export default function DualPath() {
             <Briefcase className="text-terracotta mb-6" size={28} />
             <h3 className="font-display font-bold text-2xl mb-3">Hiring a dev partner?</h3>
             <p className="text-ivory/70 leading-relaxed">
-              We design and ship custom software — PWAs, offline-first systems, AI features —
-              for businesses that need something that actually works in the field, not just the demo.
+              We design and ship custom software — apps, AI features, full systems —
+              for businesses that need something that actually works for their users, not just the demo.
             </p>
           </div>
           <a href="#contact" className="focus-ring mt-8 inline-flex items-center gap-1 text-gold font-medium">
@@ -36,8 +36,8 @@ export default function DualPath() {
             <Rocket className="text-gold mb-6" size={28} />
             <h3 className="font-display font-bold text-2xl mb-3">Looking for an app to use?</h3>
             <p className="text-ivory/70 leading-relaxed">
-              Explore our own product line — study tools, SACCO management, health, farming,
-              and more — built African-first and designed to work offline.
+              Explore our own product line — study tools, finance, health, communication,
+              and more — built to solve real problems for real people, wherever they are.
             </p>
           </div>
           <a href="#products" className="focus-ring mt-8 inline-flex items-center gap-1 text-ivory font-medium">

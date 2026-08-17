@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { ArrowRight, Wifi, WifiOff } from 'lucide-react'
+import { ArrowRight, Sparkles, Globe2 } from 'lucide-react'
 
 export default function Hero() {
   return (
@@ -16,7 +16,7 @@ export default function Hero() {
           className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-gold border border-gold/30 rounded-full px-4 py-1.5 mb-8"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
-          Kampala, Uganda — building for Africa
+          Building for everyday problems, everywhere
         </motion.div>
 
         <motion.h1
@@ -25,8 +25,8 @@ export default function Hero() {
           transition={{ duration: 0.7, delay: 0.1 }}
           className="font-display font-bold text-5xl md:text-7xl leading-[1.05] max-w-4xl"
         >
-          Software that works
-          <span className="block text-terracotta">even when the network doesn't.</span>
+          Software for the problems
+          <span className="block text-terracotta">people actually have.</span>
         </motion.h1>
 
         <motion.p
@@ -44,9 +44,9 @@ export default function Hero() {
           transition={{ duration: 0.7, delay: 0.2 }}
           className="mt-8 text-lg md:text-xl text-ivory/70 max-w-2xl leading-relaxed"
         >
-          SayMyTech Developers designs and builds offline-first, AI-integrated products
-          for African realities — patchy data, shared devices, low bandwidth — without
-          cutting a single corner on design or engineering.
+          SayMyTech Developers designs and builds AI-integrated software that solves real,
+          everyday problems — for study, money, health, communication, and work. No region
+          limits our thinking, and no corner gets cut on design or engineering.
         </motion.p>
 
         <motion.div
@@ -75,9 +75,9 @@ export default function Hero() {
           transition={{ duration: 0.8, delay: 0.5 }}
           className="mt-16 flex items-center gap-6 text-sm text-ivory/50 font-mono"
         >
-          <span className="flex items-center gap-2"><WifiOff size={16} /> Offline-first by default</span>
+          <span className="flex items-center gap-2"><Sparkles size={16} /> AI where it actually helps</span>
           <span className="w-px h-4 bg-ivory/20" />
-          <span className="flex items-center gap-2"><Wifi size={16} /> Syncs when you're back</span>
+          <span className="flex items-center gap-2"><Globe2 size={16} /> Built for any market, any user</span>
         </motion.div>
       </div>
     </section>

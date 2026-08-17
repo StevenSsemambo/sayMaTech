@@ -29,9 +29,8 @@ export default function VisionMission() {
           <Target className="text-savanna mb-6" size={26} />
           <span className="text-xs font-mono uppercase tracking-widest text-savanna">Mission</span>
           <p className="mt-3 font-display font-semibold text-xl md:text-2xl text-ink leading-snug">
-            To design and build offline-first, AI-integrated software that works for every
-            African reality — regardless of connectivity, device, or language — putting
-            reliable technology directly into people's hands.
+            To design and build AI-integrated software that solves real, everyday problems —
+            for study, money, health, communication, and work — for anyone, anywhere.
           </p>
         </motion.div>
       </div>

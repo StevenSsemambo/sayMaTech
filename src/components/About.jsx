@@ -28,9 +28,10 @@ export default function About() {
             programming as a Lecturing Assistant.
           </p>
           <p>
-            Every product carries the same starting question: does this actually work for someone
-            on a shared phone, patchy data, and a language that isn't always English-first? That
-            African-first lens shapes the architecture before it shapes the interface.
+            Every product carries the same starting question: does this actually solve the
+            problem for the person using it — on their device, their connection, their day?
+            That practical lens shapes the architecture before it shapes the interface,
+            wherever in the world that person happens to be.
           </p>
         </motion.div>
       </div>

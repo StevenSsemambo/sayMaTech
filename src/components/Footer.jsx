@@ -6,7 +6,7 @@ export default function Footer() {
           SayMy<span className="text-terracotta">Tech</span> Developers
         </span>
         <span className="font-mono text-xs tracking-wide">It's Your Tech</span>
-        <span>Kampala, Uganda · African-first software</span>
+        <span>Software for everyday problems, everywhere</span>
         <a
           href="https://github.com/StevenSsemambo/"
           target="_blank"
