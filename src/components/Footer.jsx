@@ -1,9 +1,14 @@
+import LogoMark from './Logo'
+
 export default function Footer() {
   return (
     <footer className="bg-ink text-ivory/60 px-6 py-10">
       <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm">
-        <span className="font-display font-semibold text-ivory">
-          SayMy<span className="text-terracotta">Tech</span> Developers
+        <span className="flex items-center gap-2">
+          <LogoMark size={26} />
+          <span className="font-display font-semibold text-ivory">
+            SayMy<span className="text-terracotta">Tech</span> Developers
+          </span>
         </span>
         <span className="font-mono text-xs tracking-wide">It's Your Tech</span>
         <span>Software for everyday problems, everywhere</span>

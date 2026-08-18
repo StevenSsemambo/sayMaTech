@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
+import LogoMark from './Logo'
 
 const links = [
   { href: '/services', label: 'For Businesses' },
@@ -10,27 +11,17 @@ const links = [
 
 export default function Nav() {
   const [open, setOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8)
-    window.addEventListener('scroll', onScroll)
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
 
   return (
-    <header
-      className={`fixed top-0 inset-x-0 z-50 transition-colors duration-300 ${
-        scrolled ? 'bg-ivory/90 backdrop-blur-sm shadow-sm' : 'bg-transparent'
-      }`}
-    >
-      <nav className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
-        <Link to="/" className="focus-ring flex items-baseline gap-2">
-          <span className="font-display font-bold text-lg tracking-tight text-ink">
-            SayMy<span className="text-terracotta">Tech</span>
-          </span>
-          <span className="hidden sm:inline text-xs font-mono text-ink/40 tracking-wide">
-            It's Your Tech
+    <header className="fixed top-0 inset-x-0 z-50 bg-ivory/95 backdrop-blur-sm shadow-sm border-b border-ink/5">
+      <nav className="max-w-6xl mx-auto flex items-center justify-between px-6 py-3">
+        <Link to="/" className="focus-ring flex items-center gap-2.5">
+          <LogoMark size={38} />
+          <span className="flex flex-col leading-none">
+            <span className="font-display font-bold text-xl tracking-tight text-ink">
+              SayMy<span className="text-terracotta">Tech</span>
+            </span>
+            <span className="text-[10px] font-mono text-ink/40 tracking-wide">It's Your Tech</span>
           </span>
         </Link>
         <div className="hidden md:flex items-center gap-8">

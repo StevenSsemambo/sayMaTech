@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Sparkles, Globe2 } from 'lucide-react'
+import LogoMark from './Logo'
 
 export default function Hero() {
   return (
@@ -10,6 +11,18 @@ export default function Hero() {
       <div className="absolute top-1/2 -left-32 w-80 h-80 rounded-full bg-terracotta/10 blur-3xl" />
 
       <div className="relative max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex items-center gap-3 mb-10"
+        >
+          <LogoMark size={40} />
+          <span className="font-display font-bold text-2xl tracking-tight text-ivory">
+            SayMy<span className="text-terracotta-soft">Tech</span>
+          </span>
+        </motion.div>
+
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
