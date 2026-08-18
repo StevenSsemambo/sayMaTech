@@ -57,7 +57,7 @@ export default function Products({ limit, showFilters = false, title = "Real pro
               viewport={{ once: true, margin: '-40px' }}
               transition={{ duration: 0.35, delay: (i % 3) * 0.06 }}
             >
-              <TiltCard className="group bg-ivory rounded-xl p-6 border border-ink/8 hover:border-terracotta/40 transition-colors duration-300">
+              <TiltCard className="glass-panel-light group rounded-xl p-6 hover:shadow-lg hover:shadow-terracotta/10 transition-shadow duration-300">
                 <span className="text-[11px] font-mono uppercase tracking-wide text-savanna">{p.tag}</span>
                 <h3 className="font-display font-bold text-lg mt-2 text-ink flex items-center gap-1.5">
                   {p.name}

@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ArrowRight } from 'lucide-react'
+import Magnetic from './Magnetic'
 
 export default function CtaBanner() {
   return (
@@ -19,12 +20,14 @@ export default function CtaBanner() {
         <p className="mt-4 text-ivory/85 text-lg">
           Tell us what you're trying to build. We'll reply with real next steps.
         </p>
-        <Link
-          to="/contact"
-          className="focus-ring mt-8 inline-flex items-center gap-2 bg-ink hover:bg-ink-soft text-ivory font-medium px-6 py-3.5 rounded-xl transition-colors"
-        >
-          Start a project <ArrowRight size={18} />
-        </Link>
+        <Magnetic>
+          <Link
+            to="/contact"
+            className="focus-ring mt-8 inline-flex items-center gap-2 bg-ink hover:bg-ink-soft text-ivory font-medium px-6 py-3.5 rounded-xl transition-colors"
+          >
+            Start a project <ArrowRight size={18} />
+          </Link>
+        </Magnetic>
       </motion.div>
     </section>
   )

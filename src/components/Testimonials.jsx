@@ -53,7 +53,7 @@ export default function Testimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-40px' }}
               transition={{ duration: 0.4, delay: i * 0.08 }}
-              className="bg-ivory rounded-xl p-6 border border-ink/8 flex flex-col"
+              className="glass-panel-light rounded-xl p-6 flex flex-col"
             >
               <Quote className="text-terracotta/40 mb-3" size={22} />
               <p className="text-sm text-ink/75 leading-relaxed flex-1">"{r.quote}"</p>

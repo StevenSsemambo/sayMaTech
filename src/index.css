@@ -70,3 +70,25 @@
 .animate-marquee:hover {
   animation-play-state: paused;
 }
+
+/* Futuristic glass panel */
+.glass-panel {
+  background: rgba(253, 248, 240, 0.06);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(253, 248, 240, 0.12);
+}
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(11, 31, 26, 0.08);
+}
+
+@keyframes borderGlow {
+  0%, 100% { box-shadow: 0 0 0 1px rgba(232,98,44,0.15), 0 0 24px rgba(232,98,44,0.08); }
+  50% { box-shadow: 0 0 0 1px rgba(242,183,5,0.25), 0 0 32px rgba(242,183,5,0.14); }
+}
+.glow-border {
+  animation: borderGlow 4s ease-in-out infinite;
+}

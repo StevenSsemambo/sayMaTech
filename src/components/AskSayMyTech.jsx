@@ -59,7 +59,7 @@ export default function AskSayMyTech() {
     <>
       <motion.button
         onClick={() => setOpen(!open)}
-        className="focus-ring fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-terracotta text-ivory rounded-full pl-4 pr-5 py-3.5 shadow-xl shadow-terracotta/30"
+        className="focus-ring glow-border fixed bottom-6 right-6 z-50 flex items-center gap-2 bg-terracotta text-ivory rounded-full pl-4 pr-5 py-3.5 shadow-xl shadow-terracotta/30"
         whileHover={{ scale: 1.04 }}
         whileTap={{ scale: 0.97 }}
       >
@@ -78,9 +78,9 @@ export default function AskSayMyTech() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.97 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-6 z-50 w-[92vw] max-w-sm h-[70vh] max-h-[560px] bg-ivory rounded-2xl shadow-2xl border border-ink/10 flex flex-col overflow-hidden"
+            className="glass-panel-light fixed bottom-24 right-6 z-50 w-[92vw] max-w-sm h-[70vh] max-h-[560px] rounded-2xl shadow-2xl flex flex-col overflow-hidden"
           >
-            <div className="bg-ink text-ivory px-5 py-4 flex items-center gap-2">
+            <div className="bg-ink/95 backdrop-blur-sm text-ivory px-5 py-4 flex items-center gap-2">
               <Sparkles size={16} className="text-gold" />
               <div>
                 <p className="font-display font-semibold text-sm">Ask SayMyTech</p>
