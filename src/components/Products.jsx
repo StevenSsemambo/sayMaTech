@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ArrowUpRight } from 'lucide-react'
 import { products, categories } from '../data/products'
+import TiltCard from './TiltCard'
 
 export default function Products({ limit, showFilters = false, title = "Real products, already in people's hands." }) {
   const [filter, setFilter] = useState('All')
@@ -55,14 +56,15 @@ export default function Products({ limit, showFilters = false, title = "Real pro
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-40px' }}
               transition={{ duration: 0.35, delay: (i % 3) * 0.06 }}
-              className="group bg-ivory rounded-xl p-6 border border-ink/8 hover:border-terracotta/40 hover:-translate-y-1 transition-all duration-300"
             >
-              <span className="text-[11px] font-mono uppercase tracking-wide text-savanna">{p.tag}</span>
-              <h3 className="font-display font-bold text-lg mt-2 text-ink flex items-center gap-1.5">
-                {p.name}
-                <ArrowUpRight size={15} className="text-terracotta opacity-0 group-hover:opacity-100 transition-opacity" />
-              </h3>
-              <p className="mt-2 text-sm text-ink/60 leading-relaxed">{p.desc}</p>
+              <TiltCard className="group bg-ivory rounded-xl p-6 border border-ink/8 hover:border-terracotta/40 transition-colors duration-300">
+                <span className="text-[11px] font-mono uppercase tracking-wide text-savanna">{p.tag}</span>
+                <h3 className="font-display font-bold text-lg mt-2 text-ink flex items-center gap-1.5">
+                  {p.name}
+                  <ArrowUpRight size={15} className="text-terracotta opacity-0 group-hover:opacity-100 transition-opacity" />
+                </h3>
+                <p className="mt-2 text-sm text-ink/60 leading-relaxed">{p.desc}</p>
+              </TiltCard>
             </motion.div>
           ))}
         </div>

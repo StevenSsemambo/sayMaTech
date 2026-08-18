@@ -54,3 +54,19 @@
   outline: 3px solid var(--color-gold);
   outline-offset: 3px;
 }
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-marquee {
+  animation: marquee 28s linear infinite;
+  width: max-content;
+}
+.animate-marquee:hover {
+  animation-play-state: paused;
+}

@@ -2,6 +2,10 @@ import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { ArrowRight, Sparkles, Globe2 } from 'lucide-react'
 import LogoMark from './Logo'
+import RotatingWord from './RotatingWord'
+import CursorGlow from './CursorGlow'
+
+const PROBLEMS = ['study.', 'money.', 'health.', 'communication.', 'work.']
 
 export default function Hero() {
   return (
@@ -9,6 +13,7 @@ export default function Hero() {
       {/* Ambient gold glow */}
       <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-gold/10 blur-3xl" />
       <div className="absolute top-1/2 -left-32 w-80 h-80 rounded-full bg-terracotta/10 blur-3xl" />
+      <CursorGlow />
 
       <div className="relative max-w-6xl mx-auto">
         <motion.div
@@ -39,8 +44,10 @@ export default function Hero() {
           transition={{ duration: 0.7, delay: 0.1 }}
           className="font-display font-bold text-5xl md:text-7xl leading-[1.05] max-w-4xl"
         >
-          Software for the problems
-          <span className="block text-terracotta">people actually have.</span>
+          Software that solves
+          <span className="block text-terracotta">
+            <RotatingWord words={PROBLEMS} />
+          </span>
         </motion.h1>
 
         <motion.p

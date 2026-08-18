@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRight, Check } from 'lucide-react'
 
 export default function Contact() {
@@ -30,58 +30,81 @@ export default function Contact() {
           </p>
         </motion.div>
 
-        {sent ? (
-          <div className="mt-10 bg-ivory rounded-xl p-8 flex items-center gap-3 text-ink">
-            <Check className="text-savanna" />
-            <span className="font-medium">Got it — we'll be in touch shortly.</span>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="mt-10 bg-ivory rounded-2xl p-8 grid gap-5">
-            <div className="grid sm:grid-cols-2 gap-5">
-              <div>
-                <label className="text-sm font-medium text-ink/70" htmlFor="name">Your name</label>
-                <input
-                  id="name"
-                  required
-                  value={form.name}
-                  onChange={(e) => setForm({ ...form, name: e.target.value })}
-                  className="focus-ring mt-1.5 w-full rounded-lg border border-ink/15 px-4 py-3 text-ink"
-                  placeholder="Jane Nakato"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium text-ink/70" htmlFor="email">Email</label>
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="focus-ring mt-1.5 w-full rounded-lg border border-ink/15 px-4 py-3 text-ink"
-                  placeholder="jane@company.com"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-ink/70" htmlFor="project">What are you building?</label>
-              <textarea
-                id="project"
-                required
-                rows={4}
-                value={form.project}
-                onChange={(e) => setForm({ ...form, project: e.target.value })}
-                className="focus-ring mt-1.5 w-full rounded-lg border border-ink/15 px-4 py-3 text-ink resize-none"
-                placeholder="A short description of the idea, timeline, or problem you're solving..."
-              />
-            </div>
-            <button
-              type="submit"
-              className="focus-ring justify-self-start inline-flex items-center gap-2 bg-ink hover:bg-ink-soft text-ivory font-medium px-6 py-3.5 rounded-xl transition-colors"
+        <AnimatePresence mode="wait">
+          {sent ? (
+            <motion.div
+              key="success"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, type: 'spring', bounce: 0.4 }}
+              className="mt-10 bg-ivory rounded-2xl p-10 flex flex-col items-center text-center gap-3 text-ink"
             >
-              Send it over <ArrowRight size={18} />
-            </button>
-          </form>
-        )}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.15, type: 'spring', bounce: 0.5 }}
+                className="w-14 h-14 rounded-full bg-savanna/15 flex items-center justify-center"
+              >
+                <Check className="text-savanna" size={26} />
+              </motion.div>
+              <p className="font-display font-bold text-lg">Got it — we'll be in touch shortly.</p>
+              <p className="text-sm text-ink/50">Thanks for reaching out to SayMyTech.</p>
+            </motion.div>
+          ) : (
+            <motion.form
+              key="form"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onSubmit={handleSubmit}
+              className="mt-10 bg-ivory rounded-2xl p-8 grid gap-5"
+            >
+              <div className="grid sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="text-sm font-medium text-ink/70" htmlFor="name">Your name</label>
+                  <input
+                    id="name"
+                    required
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="focus-ring mt-1.5 w-full rounded-lg border border-ink/15 px-4 py-3 text-ink"
+                    placeholder="Jane Nakato"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-ink/70" htmlFor="email">Email</label>
+                  <input
+                    id="email"
+                    type="email"
+                    required
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="focus-ring mt-1.5 w-full rounded-lg border border-ink/15 px-4 py-3 text-ink"
+                    placeholder="jane@company.com"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-ink/70" htmlFor="project">What are you building?</label>
+                <textarea
+                  id="project"
+                  required
+                  rows={4}
+                  value={form.project}
+                  onChange={(e) => setForm({ ...form, project: e.target.value })}
+                  className="focus-ring mt-1.5 w-full rounded-lg border border-ink/15 px-4 py-3 text-ink resize-none"
+                  placeholder="A short description of the idea, timeline, or problem you're solving..."
+                />
+              </div>
+              <button
+                type="submit"
+                className="focus-ring justify-self-start inline-flex items-center gap-2 bg-ink hover:bg-ink-soft text-ivory font-medium px-6 py-3.5 rounded-xl transition-colors"
+              >
+                Send it over <ArrowRight size={18} />
+              </button>
+            </motion.form>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   )
