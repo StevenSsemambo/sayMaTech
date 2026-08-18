@@ -1,10 +1,17 @@
 import FingerprintCircuit from '../components/logo-concepts/FingerprintCircuit'
+import FingerPower from '../components/logo-concepts/FingerPower'
 import QuoteSlash from '../components/logo-concepts/QuoteSlash'
 import CompassS from '../components/logo-concepts/CompassS'
 import DialogueLoop from '../components/logo-concepts/DialogueLoop'
 import OpenKey from '../components/logo-concepts/OpenKey'
 
 const CONCEPTS = [
+  {
+    id: 'fingerpower',
+    name: '6. Fingerprint Power Touch — refined pick',
+    idea: 'A fingertip, ridges and all, pressing straight into an open power ring — the moment of activation. "It\'s Your Tech": your own touch is what switches it on.',
+    Icon: FingerPower,
+  },
   {
     id: 'fingerprint',
     name: '1. Fingerprint Circuit',
