@@ -19,24 +19,32 @@ export default function LogoMark({ size = 44, className = '' }) {
       {/* Badge */}
       <rect x="2" y="2" width="60" height="60" rx="17" fill="url(#stmGrad)" />
 
-      {/* Speech bubble — "Say" */}
-      <rect x="13" y="17" width="25" height="19" rx="7" fill="#FDF8F0" />
-      <path d="M19 33 L14 43 L25 34.5 Z" fill="#FDF8F0" />
+      {/* click ripple, behind everything */}
+      <circle cx="32" cy="31" r="9" fill="none" stroke="#FDF8F0" strokeWidth="1" opacity="0.25" />
+      <circle cx="32" cy="31" r="5.5" fill="none" stroke="#FDF8F0" strokeWidth="1" opacity="0.35" />
 
-      {/* Code slash — "Tech" */}
-      <rect
-        x="30.5"
-        y="14"
-        width="6"
-        height="34"
-        rx="3"
-        fill="#0B1F1A"
-        transform="rotate(20 33.5 31)"
+      {/* power ring — open at top where the finger presses in */}
+      <path
+        d="M38.5 30.5 A 10.8 10.8 0 1 1 25.5 30.5"
+        fill="none"
+        stroke="#FDF8F0"
+        strokeWidth="4.4"
+        strokeLinecap="round"
       />
 
-      {/* Signal pulse dot — AI layer */}
-      <circle cx="48" cy="17" r="4" fill="#0B1F1A" />
-      <circle cx="48" cy="17" r="4" fill="none" stroke="#FDF8F0" strokeWidth="1.5" />
+      {/* finger reaching down from the top edge into the gap */}
+      <rect x="26.5" y="6" width="11" height="27" rx="5.5" fill="#FDF8F0" />
+
+      {/* fingerprint ridges on the fingertip */}
+      <g fill="none" stroke="#E8622C" strokeWidth="1.4" strokeLinecap="round" opacity="0.85">
+        <path d="M29 13 Q32 11 35 13" />
+        <path d="M28.5 17 Q32 14.5 35.5 17" />
+        <path d="M28.3 21 Q32 18 35.7 21" />
+      </g>
+
+      {/* contact / activation point */}
+      <circle cx="32" cy="30.5" r="2.6" fill="#0B1F1A" />
+      <circle cx="32" cy="30.5" r="2.6" fill="none" stroke="#F2B705" strokeWidth="1" />
     </svg>
   )
 }
