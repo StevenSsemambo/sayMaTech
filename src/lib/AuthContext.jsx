@@ -31,12 +31,15 @@ export function AuthProvider({ children }) {
     init()
 
     const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (!active) return
+      setLoading(true)
       setSession(session)
       if (session?.user) {
         await loadProfile(session.user.id)
       } else {
         setProfile(null)
       }
+      if (active) setLoading(false)
     })
 
     return () => {
