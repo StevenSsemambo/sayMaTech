@@ -9,27 +9,40 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   async function loadProfile(userId) {
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single()
-    setProfile(data)
+    const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).single()
+    if (error) {
+      console.error('Failed to load profile:', error)
+    }
+    setProfile(data ?? null)
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      if (session?.user) loadProfile(session.user.id)
-      setLoading(false)
-    })
+    let active = true
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    async function init() {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!active) return
       setSession(session)
       if (session?.user) {
-        loadProfile(session.user.id)
+        await loadProfile(session.user.id)
+      }
+      if (active) setLoading(false)
+    }
+    init()
+
+    const { data: listener } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      setSession(session)
+      if (session?.user) {
+        await loadProfile(session.user.id)
       } else {
         setProfile(null)
       }
     })
 
-    return () => listener.subscription.unsubscribe()
+    return () => {
+      active = false
+      listener.subscription.unsubscribe()
+    }
   }, [])
 
   const value = {
