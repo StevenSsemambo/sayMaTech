@@ -39,6 +39,12 @@ export default function Nav() {
             </NavLink>
           ))}
           <Link
+            to="/portal"
+            className="focus-ring text-sm font-medium text-ink/60 hover:text-terracotta transition-colors"
+          >
+            Client Portal
+          </Link>
+          <Link
             to="/contact"
             className="focus-ring text-sm font-medium bg-ink text-ivory px-4 py-2 rounded-lg hover:bg-ink-soft transition-colors"
           >
@@ -66,6 +72,9 @@ export default function Nav() {
               {l.label}
             </NavLink>
           ))}
+          <Link to="/portal" onClick={() => setOpen(false)} className="text-sm font-medium text-ink/60">
+            Client Portal
+          </Link>
           <Link to="/contact" onClick={() => setOpen(false)} className="text-sm font-medium text-terracotta">
             Start a Project
           </Link>
