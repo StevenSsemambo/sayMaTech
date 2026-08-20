@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { LogOut, FolderKanban } from 'lucide-react'
+import { LogOut, FolderKanban, Receipt } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 import { supabase } from '../lib/supabase'
 import AuthForm from '../components/portal/AuthForm'
@@ -11,17 +11,24 @@ function ClientDashboard() {
   const { profile, signOut } = useAuth()
   const [projects, setProjects] = useState([])
   const [active, setActive] = useState(null)
+  const [invoices, setInvoices] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     async function load() {
-      const { data } = await supabase.from('projects').select('*').order('created_at', { ascending: false })
-      setProjects(data || [])
-      if (data?.length) setActive(data[0])
+      const [{ data: projectData }, { data: invoiceData }] = await Promise.all([
+        supabase.from('projects').select('*').order('created_at', { ascending: false }),
+        supabase.from('invoices').select('*').order('created_at', { ascending: false }),
+      ])
+      setProjects(projectData || [])
+      setInvoices(invoiceData || [])
+      if (projectData?.length) setActive(projectData[0])
       setLoading(false)
     }
     load()
   }, [])
+
+  const activeInvoice = active ? invoices.find((inv) => inv.project_id === active.id) : null
 
   return (
     <div className="min-h-screen bg-ivory pt-24 px-6 pb-16">
@@ -78,6 +85,17 @@ function ClientDashboard() {
                     </div>
                     {active.description && (
                       <p className="text-sm text-ink/60 mt-1.5">{active.description}</p>
+                    )}
+                    {activeInvoice && (
+                      <div className="mt-3 flex items-center gap-2 bg-savanna/10 text-savanna text-xs rounded-lg px-3 py-2 w-fit">
+                        <Receipt size={14} />
+                        <span>
+                          {activeInvoice.invoice_number}
+                          {activeInvoice.amount != null && ` — ${activeInvoice.amount}`}
+                          {' · '}
+                          {activeInvoice.status}
+                        </span>
+                      </div>
                     )}
                   </div>
                   <div className="flex-1 min-h-0">

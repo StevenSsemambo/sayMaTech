@@ -1,8 +1,13 @@
 // Netlify serverless function powering the "Ask SayMyTech" assistant.
 // Calls the Anthropic API server-side so the API key never reaches the browser.
+// Also auto-captures and scores leads from conversations into Supabase.
 //
-// SETUP: In your Netlify site settings → Environment variables, add:
+// SETUP: In Netlify env vars, set:
 //   ANTHROPIC_API_KEY = your key from console.anthropic.com
+//   SUPABASE_URL = your Supabase project URL
+//   SUPABASE_ANON_KEY = your Supabase anon/publishable key
+
+import { createClient } from '@supabase/supabase-js'
 
 const SYSTEM_PROMPT = `You are the "Ask SayMyTech" assistant on the SayMyTech Developers website.
 
@@ -40,6 +45,72 @@ Keep replies short (2-4 sentences), warm, plain-spoken, and confident — never 
 corporate tone. Never invent pricing, timelines, or promises on Steven's behalf beyond
 "we'll follow up with specifics." If asked something you don't know, say so and point them
 to the contact form.`
+
+const LEAD_EXTRACTION_TOOL = {
+  name: 'extract_lead',
+  description: 'Extract lead information from the conversation so far, if the visitor shows genuine interest in hiring SayMyTech for a project.',
+  input_schema: {
+    type: 'object',
+    properties: {
+      is_lead: {
+        type: 'boolean',
+        description: 'True only if the visitor has expressed real interest in a paid project (not just browsing products or asking general questions).',
+      },
+      name: { type: 'string', description: 'The visitor\'s name, if they gave it. Empty string if not given.' },
+      email: { type: 'string', description: 'The visitor\'s email, if they gave it. Empty string if not given.' },
+      category: { type: 'string', description: 'Short category of what they want built, e.g. "e-commerce app", "AI chatbot", "internal tool".' },
+      urgency: { type: 'string', enum: ['low', 'medium', 'high'], description: 'How urgent/ready-to-buy they seem. High = clear budget+timeline+intent. Low = casually curious.' },
+      summary: { type: 'string', description: 'One or two sentence summary of what they want, for the founder to read quickly.' },
+    },
+    required: ['is_lead', 'summary'],
+  },
+}
+
+async function extractAndStoreLead(anthropicMessages, apiKey) {
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-5',
+        max_tokens: 300,
+        system: 'Analyze this website chat conversation and extract lead information using the extract_lead tool. Only mark is_lead true if there is genuine project/hiring interest.',
+        messages: anthropicMessages,
+        tools: [LEAD_EXTRACTION_TOOL],
+        tool_choice: { type: 'tool', name: 'extract_lead' },
+      }),
+    })
+    if (!res.ok) return
+
+    const data = await res.json()
+    const toolUse = data.content?.find((b) => b.type === 'tool_use')
+    if (!toolUse) return
+    const lead = toolUse.input
+
+    if (!lead.is_lead) return
+
+    const supabaseUrl = process.env.SUPABASE_URL
+    const supabaseKey = process.env.SUPABASE_ANON_KEY
+    if (!supabaseUrl || !supabaseKey) return
+
+    const supabase = createClient(supabaseUrl, supabaseKey)
+    await supabase.from('leads').insert({
+      name: lead.name || null,
+      email: lead.email || null,
+      category: lead.category || null,
+      urgency: lead.urgency || 'medium',
+      summary: lead.summary,
+      source: 'chat',
+    })
+  } catch (err) {
+    // Lead capture is best-effort — never let it break the chat reply
+    console.error('Lead extraction failed:', err)
+  }
+}
 
 export const handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -91,6 +162,11 @@ export const handler = async (event) => {
 
     const data = await res.json()
     const reply = data.content?.find((b) => b.type === 'text')?.text || "Sorry, I didn't catch that — could you rephrase?"
+
+    // Fire-and-forget lead extraction — only bother once there's enough conversation to judge intent
+    if (anthropicMessages.length >= 2) {
+      extractAndStoreLead(anthropicMessages, apiKey)
+    }
 
     return {
       statusCode: 200,
