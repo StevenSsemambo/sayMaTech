@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react'
-import { LogOut, Plus, ShieldAlert, FolderKanban, Sparkles, Receipt } from 'lucide-react'
+import { LogOut, Plus, ShieldAlert, FolderKanban, Sparkles, Receipt, ClipboardList } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 import { supabase } from '../lib/supabase'
 import AuthForm from '../components/portal/AuthForm'
 import StatusBadge from '../components/portal/StatusBadge'
 import MessageThread from '../components/portal/MessageThread'
 import LeadsPanel from '../components/portal/LeadsPanel'
+import RequestsPanel from '../components/portal/RequestsPanel'
+import NotificationBell from '../components/portal/NotificationBell'
+import { notifyClient } from '../lib/notifications'
 
 const STATUSES = ['discovery', 'in_progress', 'review', 'completed', 'on_hold']
 
@@ -150,6 +153,13 @@ function ProjectsView() {
     setActive((a) => (a?.id === project.id ? { ...a, status } : a))
     setProjects((ps) => ps.map((p) => (p.id === project.id ? { ...p, status } : p)))
 
+    notifyClient(
+      project.client_id,
+      'status_change',
+      `Your project "${project.name}" moved to: ${status.replace('_', ' ')}`,
+      project.id
+    )
+
     // Automation: completing a project auto-creates its invoice, if one doesn't exist yet
     if (status === 'completed') {
       const { data: existing } = await supabase
@@ -256,12 +266,15 @@ function AdminDashboard() {
             <p className="text-xs font-mono uppercase tracking-widest text-terracotta">Admin</p>
             <h1 className="font-display font-bold text-2xl text-ink mt-1">Company control panel</h1>
           </div>
-          <button
-            onClick={signOut}
-            className="focus-ring flex items-center gap-1.5 text-sm text-ink/50 hover:text-terracotta"
-          >
-            <LogOut size={15} /> Log out
-          </button>
+          <div className="flex items-center gap-4">
+            <NotificationBell />
+            <button
+              onClick={signOut}
+              className="focus-ring flex items-center gap-1.5 text-sm text-ink/50 hover:text-terracotta"
+            >
+              <LogOut size={15} /> Log out
+            </button>
+          </div>
         </div>
 
         <div className="flex gap-2 mb-6 bg-ivory-dim rounded-lg p-1 w-fit">
@@ -274,6 +287,14 @@ function AdminDashboard() {
             <FolderKanban size={14} /> Projects
           </button>
           <button
+            onClick={() => setTab('requests')}
+            className={`focus-ring flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-md transition-colors ${
+              tab === 'requests' ? 'bg-ink text-ivory' : 'text-ink/60'
+            }`}
+          >
+            <ClipboardList size={14} /> Requests
+          </button>
+          <button
             onClick={() => setTab('leads')}
             className={`focus-ring flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-md transition-colors ${
               tab === 'leads' ? 'bg-ink text-ivory' : 'text-ink/60'
@@ -283,7 +304,9 @@ function AdminDashboard() {
           </button>
         </div>
 
-        {tab === 'projects' ? <ProjectsView /> : <LeadsPanel />}
+        {tab === 'projects' && <ProjectsView />}
+        {tab === 'requests' && <RequestsPanel onApproved={() => setTab('projects')} />}
+        {tab === 'leads' && <LeadsPanel />}
       </div>
     </div>
   )
