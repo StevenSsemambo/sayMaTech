@@ -13,7 +13,7 @@
 
 import { createClient } from '@supabase/supabase-js'
 
-const GEMINI_MODEL = 'gemini-2.5-flash'
+const GEMINI_MODEL = 'gemini-3.6-flash'
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
 
 const SYSTEM_PROMPT = `You are the "Ask SayMyTech" assistant on the SayMyTech Developers website.
@@ -142,10 +142,10 @@ export const handler = async (event) => {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
     return {
-      statusCode: 200,
+      statusCode: 500,
       body: JSON.stringify({
         reply:
-          "[debug] GEMINI_API_KEY is missing from the function's environment — check Netlify env vars.",
+          "The assistant isn't fully configured yet — the site owner needs to add a GEMINI_API_KEY in Netlify's environment variables.",
       }),
     }
   }
@@ -171,8 +171,8 @@ export const handler = async (event) => {
   } catch (err) {
     console.error(err)
     return {
-      statusCode: 200,
-      body: JSON.stringify({ reply: `[debug] ${err.message}` }),
+      statusCode: 502,
+      body: JSON.stringify({ reply: 'Something went wrong on our end — please try again shortly.' }),
     }
   }
 }
