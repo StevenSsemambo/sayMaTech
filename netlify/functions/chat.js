@@ -171,8 +171,8 @@ export const handler = async (event) => {
   } catch (err) {
     console.error(err)
     return {
-      statusCode: 502,
-      body: JSON.stringify({ reply: 'Something went wrong on our end — please try again shortly.' }),
+      statusCode: 200,
+      body: JSON.stringify({ reply: `[debug] ${err.message}` }),
     }
   }
 }
