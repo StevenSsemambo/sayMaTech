@@ -8,8 +8,12 @@ const SUGGESTIONS = [
   'Do you build offline apps?',
 ]
 
+const STORAGE_KEY = 'saymytech_visitor_email'
+
 export default function AskSayMyTech() {
   const [open, setOpen] = useState(false)
+  const [visitorEmail, setVisitorEmail] = useState(null)
+  const [returning, setReturning] = useState(false)
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
@@ -20,6 +24,11 @@ export default function AskSayMyTech() {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const endRef = useRef(null)
+
+  useEffect(() => {
+    const stored = typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null
+    if (stored) setVisitorEmail(stored)
+  }, [])
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -36,11 +45,17 @@ export default function AskSayMyTech() {
       const res = await fetch('/.netlify/functions/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: next }),
+        body: JSON.stringify({ messages: next, visitorEmail }),
       })
       if (!res.ok) throw new Error('Request failed')
       const data = await res.json()
       setMessages([...next, { role: 'assistant', content: data.reply }])
+
+      if (data.visitorEmail && data.visitorEmail !== visitorEmail) {
+        setVisitorEmail(data.visitorEmail)
+        localStorage.setItem(STORAGE_KEY, data.visitorEmail)
+      }
+      if (data.returning) setReturning(true)
     } catch (err) {
       setMessages([
         ...next,
@@ -84,7 +99,9 @@ export default function AskSayMyTech() {
               <Sparkles size={16} className="text-gold" />
               <div>
                 <p className="font-display font-semibold text-sm">Ask SayMyTech</p>
-                <p className="text-xs text-ivory/50">Products &amp; project scoping</p>
+                <p className="text-xs text-ivory/50">
+                  {returning ? 'Welcome back' : 'Products & project scoping'}
+                </p>
               </div>
             </div>
 

@@ -1,22 +1,23 @@
 // Netlify serverless function powering the "Ask SayMyTech" assistant.
 // Calls Google's Gemini API server-side (free tier) so the key never reaches the browser.
-// Also auto-captures and scores leads from conversations into Supabase.
+// Also auto-captures/scores leads and maintains a persistent per-customer memory,
+// both in Supabase.
 //
 // SETUP: In Netlify env vars, set:
 //   GEMINI_API_KEY = your key from aistudio.google.com
-//   SUPABASE_URL = your Supabase project URL
-//   SUPABASE_ANON_KEY = your Supabase anon/publishable key
+//   SUPABASE_URL (or VITE_SUPABASE_URL) = your Supabase project URL
+//   SUPABASE_ANON_KEY (or VITE_SUPABASE_ANON_KEY) = your Supabase anon/publishable key
 //
 // To later switch to the real Claude API, replace callGemini()'s fetch with a call
 // to https://api.anthropic.com/v1/messages — the rest of this file (prompt, lead
-// extraction, response shape) stays the same.
+// extraction, memory, response shape) stays the same.
 
 import { createClient } from '@supabase/supabase-js'
 
 const GEMINI_MODEL = 'gemini-3.6-flash'
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
 
-const SYSTEM_PROMPT = `You are the "Ask SayMyTech" assistant on the SayMyTech Developers website.
+const BASE_SYSTEM_PROMPT = `You are the "Ask SayMyTech" assistant on the SayMyTech Developers website.
 
 SayMyTech Developers ("It's Your Tech") is a software studio founded by Ssemambo Steven,
 a self-taught programmer and Computer Science graduate / Lecturing Assistant at Makerere
@@ -53,6 +54,13 @@ corporate tone. Never invent pricing, timelines, or promises on Steven's behalf 
 "we'll follow up with specifics." If asked something you don't know, say so and point them
 to the contact form.`
 
+function getSupabaseCreds() {
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
+  const key = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY
+  if (!url || !key) return null
+  return { url, key }
+}
+
 function toGeminiContents(messages) {
   return messages.map((m) => ({
     role: m.role === 'assistant' ? 'model' : 'user',
@@ -78,6 +86,8 @@ async function callGemini(contents, systemInstruction, apiKey, extraConfig = {})
   return res.json()
 }
 
+// ---------- Lead capture ----------
+
 const LEAD_EXTRACTION_TOOLS = [
   {
     functionDeclarations: [
@@ -101,7 +111,7 @@ const LEAD_EXTRACTION_TOOLS = [
   },
 ]
 
-async function extractAndStoreLead(contents, apiKey) {
+async function extractAndStoreLead(contents, apiKey, supabase) {
   try {
     const data = await callGemini(
       contents,
@@ -113,13 +123,8 @@ async function extractAndStoreLead(contents, apiKey) {
     const part = data.candidates?.[0]?.content?.parts?.find((p) => p.functionCall)
     if (!part) return
     const lead = part.functionCall.args
-    if (!lead.is_lead) return
+    if (!lead.is_lead || !supabase) return
 
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
-    const supabaseKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY
-    if (!supabaseUrl || !supabaseKey) return
-
-    const supabase = createClient(supabaseUrl, supabaseKey)
     await supabase.from('leads').insert({
       name: lead.name || null,
       email: lead.email || null,
@@ -129,10 +134,79 @@ async function extractAndStoreLead(contents, apiKey) {
       source: 'chat',
     })
   } catch (err) {
-    // Lead capture is best-effort — never let it break the chat reply
     console.error('Lead extraction failed:', err)
   }
 }
+
+// ---------- Persistent customer memory ----------
+
+const MEMORY_TOOLS = [
+  {
+    functionDeclarations: [
+      {
+        name: 'update_customer_memory',
+        description: 'Produce an updated profile summary for this visitor, merging any prior known profile with new information from this conversation.',
+        parameters: {
+          type: 'object',
+          properties: {
+            email: { type: 'string', description: 'The email this visitor is identified by (given now or already known). Empty if truly unknown.' },
+            name: { type: 'string', description: "The visitor's name, if known." },
+            updated_summary: {
+              type: 'string',
+              description: 'A concise (3-5 sentence), third-person, up-to-date profile: who they are, what they care about, project interests, preferences. Merge prior knowledge with anything new — do not just append.',
+            },
+          },
+          required: ['updated_summary'],
+        },
+      },
+    ],
+  },
+]
+
+async function fetchCustomerMemory(email, supabase) {
+  if (!email || !supabase) return null
+  try {
+    const { data, error } = await supabase.rpc('get_customer_memory', { p_email: email })
+    if (error || !data || data.length === 0) return null
+    return data[0]
+  } catch (err) {
+    console.error('Fetching customer memory failed:', err)
+    return null
+  }
+}
+
+async function updateCustomerMemory(contents, apiKey, supabase, knownEmail, existingProfile) {
+  try {
+    const priorContext = existingProfile
+      ? `Existing known profile for this customer — name: ${existingProfile.name || 'unknown'}, summary: ${existingProfile.profile_summary}`
+      : 'No prior profile exists for this customer yet.'
+
+    const data = await callGemini(
+      contents,
+      `${priorContext}\n\nBased on this conversation, call update_customer_memory with an updated profile. Only worth updating if something meaningful was learned (name, project interest, preferences, recurring need). If an email wasn't given in this conversation and wasn't already known, leave email empty.`,
+      apiKey,
+      { tools: MEMORY_TOOLS, toolConfig: { functionCallingConfig: { mode: 'ANY', allowedFunctionNames: ['update_customer_memory'] } } }
+    )
+
+    const part = data.candidates?.[0]?.content?.parts?.find((p) => p.functionCall)
+    if (!part || !supabase) return null
+    const mem = part.functionCall.args
+    const email = mem.email || knownEmail
+    if (!email) return null
+
+    await supabase.rpc('upsert_customer_memory', {
+      p_email: email,
+      p_name: mem.name || null,
+      p_summary: mem.updated_summary,
+    })
+    return email
+  } catch (err) {
+    console.error('Customer memory update failed:', err)
+    return null
+  }
+}
+
+// ---------- Handler ----------
 
 export const handler = async (event) => {
   if (event.httpMethod !== 'POST') {
@@ -150,23 +224,43 @@ export const handler = async (event) => {
     }
   }
 
+  const creds = getSupabaseCreds()
+  const supabase = creds ? createClient(creds.url, creds.key) : null
+
   try {
-    const { messages } = JSON.parse(event.body)
+    const { messages, visitorEmail } = JSON.parse(event.body)
     const contents = toGeminiContents(messages)
 
-    const data = await callGemini(contents, SYSTEM_PROMPT, apiKey)
+    // Look up any known profile for this returning visitor before replying
+    const existingProfile = visitorEmail ? await fetchCustomerMemory(visitorEmail, supabase) : null
+
+    let systemPrompt = BASE_SYSTEM_PROMPT
+    if (existingProfile) {
+      systemPrompt += `\n\nThis is a RETURNING visitor you already know. Known profile — name: ${
+        existingProfile.name || 'unknown'
+      }, summary: ${existingProfile.profile_summary}. Use this naturally to personalize your tone and suggestions — don't recite it back verbatim or make it obvious you're reading from a file.`
+    }
+
+    const data = await callGemini(contents, systemPrompt, apiKey)
     const reply =
       data.candidates?.[0]?.content?.parts?.find((p) => p.text)?.text ||
       "Sorry, I didn't catch that — could you rephrase?"
 
-    // Fire-and-forget lead extraction once there's enough conversation to judge intent
+    let capturedEmail = null
+
+    // Fire-and-forget lead + memory extraction once there's enough conversation to judge
     if (contents.length >= 2) {
-      extractAndStoreLead(contents, apiKey)
+      extractAndStoreLead(contents, apiKey, supabase)
+      capturedEmail = await updateCustomerMemory(contents, apiKey, supabase, visitorEmail, existingProfile)
     }
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ reply }),
+      body: JSON.stringify({
+        reply,
+        visitorEmail: capturedEmail || visitorEmail || null,
+        returning: !!existingProfile,
+      }),
     }
   } catch (err) {
     console.error(err)
