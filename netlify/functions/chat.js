@@ -142,10 +142,10 @@ export const handler = async (event) => {
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
     return {
-      statusCode: 500,
+      statusCode: 200,
       body: JSON.stringify({
         reply:
-          "The assistant isn't fully configured yet — the site owner needs to add a GEMINI_API_KEY in Netlify's environment variables.",
+          "[debug] GEMINI_API_KEY is missing from the function's environment — check Netlify env vars.",
       }),
     }
   }
