@@ -1,13 +1,20 @@
 // Netlify serverless function powering the "Ask SayMyTech" assistant.
-// Calls the Anthropic API server-side so the API key never reaches the browser.
+// Calls Google's Gemini API server-side (free tier) so the key never reaches the browser.
 // Also auto-captures and scores leads from conversations into Supabase.
 //
 // SETUP: In Netlify env vars, set:
-//   ANTHROPIC_API_KEY = your key from console.anthropic.com
+//   GEMINI_API_KEY = your key from aistudio.google.com
 //   SUPABASE_URL = your Supabase project URL
 //   SUPABASE_ANON_KEY = your Supabase anon/publishable key
+//
+// To later switch to the real Claude API, replace callGemini()'s fetch with a call
+// to https://api.anthropic.com/v1/messages — the rest of this file (prompt, lead
+// extraction, response shape) stays the same.
 
 import { createClient } from '@supabase/supabase-js'
+
+const GEMINI_MODEL = 'gemini-2.5-flash'
+const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
 
 const SYSTEM_PROMPT = `You are the "Ask SayMyTech" assistant on the SayMyTech Developers website.
 
@@ -46,51 +53,66 @@ corporate tone. Never invent pricing, timelines, or promises on Steven's behalf 
 "we'll follow up with specifics." If asked something you don't know, say so and point them
 to the contact form.`
 
-const LEAD_EXTRACTION_TOOL = {
-  name: 'extract_lead',
-  description: 'Extract lead information from the conversation so far, if the visitor shows genuine interest in hiring SayMyTech for a project.',
-  input_schema: {
-    type: 'object',
-    properties: {
-      is_lead: {
-        type: 'boolean',
-        description: 'True only if the visitor has expressed real interest in a paid project (not just browsing products or asking general questions).',
-      },
-      name: { type: 'string', description: 'The visitor\'s name, if they gave it. Empty string if not given.' },
-      email: { type: 'string', description: 'The visitor\'s email, if they gave it. Empty string if not given.' },
-      category: { type: 'string', description: 'Short category of what they want built, e.g. "e-commerce app", "AI chatbot", "internal tool".' },
-      urgency: { type: 'string', enum: ['low', 'medium', 'high'], description: 'How urgent/ready-to-buy they seem. High = clear budget+timeline+intent. Low = casually curious.' },
-      summary: { type: 'string', description: 'One or two sentence summary of what they want, for the founder to read quickly.' },
-    },
-    required: ['is_lead', 'summary'],
-  },
+function toGeminiContents(messages) {
+  return messages.map((m) => ({
+    role: m.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: m.content }],
+  }))
 }
 
-async function extractAndStoreLead(anthropicMessages, apiKey) {
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
+async function callGemini(contents, systemInstruction, apiKey, extraConfig = {}) {
+  const res = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents,
+      systemInstruction: { parts: [{ text: systemInstruction }] },
+      generationConfig: { maxOutputTokens: 500 },
+      ...extraConfig,
+    }),
+  })
+  if (!res.ok) {
+    const errText = await res.text()
+    throw new Error(`Gemini API error (${res.status}): ${errText}`)
+  }
+  return res.json()
+}
+
+const LEAD_EXTRACTION_TOOLS = [
+  {
+    functionDeclarations: [
+      {
+        name: 'extract_lead',
+        description: 'Extract lead information from the conversation, if the visitor shows genuine interest in hiring SayMyTech for a project.',
+        parameters: {
+          type: 'object',
+          properties: {
+            is_lead: { type: 'boolean', description: 'True only if the visitor expressed real interest in a paid project (not just browsing or general questions).' },
+            name: { type: 'string', description: "The visitor's name, if given." },
+            email: { type: 'string', description: "The visitor's email, if given." },
+            category: { type: 'string', description: 'Short category of what they want built, e.g. "e-commerce app", "AI chatbot".' },
+            urgency: { type: 'string', enum: ['low', 'medium', 'high'], description: 'How ready-to-buy they seem.' },
+            summary: { type: 'string', description: 'One or two sentence summary for the founder to read quickly.' },
+          },
+          required: ['is_lead', 'summary'],
+        },
       },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 300,
-        system: 'Analyze this website chat conversation and extract lead information using the extract_lead tool. Only mark is_lead true if there is genuine project/hiring interest.',
-        messages: anthropicMessages,
-        tools: [LEAD_EXTRACTION_TOOL],
-        tool_choice: { type: 'tool', name: 'extract_lead' },
-      }),
-    })
-    if (!res.ok) return
+    ],
+  },
+]
 
-    const data = await res.json()
-    const toolUse = data.content?.find((b) => b.type === 'tool_use')
-    if (!toolUse) return
-    const lead = toolUse.input
+async function extractAndStoreLead(contents, apiKey) {
+  try {
+    const data = await callGemini(
+      contents,
+      'Analyze this website chat conversation and extract lead information using the extract_lead function. Only mark is_lead true if there is genuine project/hiring interest.',
+      apiKey,
+      { tools: LEAD_EXTRACTION_TOOLS, toolConfig: { functionCallingConfig: { mode: 'ANY', allowedFunctionNames: ['extract_lead'] } } }
+    )
 
+    const part = data.candidates?.[0]?.content?.parts?.find((p) => p.functionCall)
+    if (!part) return
+    const lead = part.functionCall.args
     if (!lead.is_lead) return
 
     const supabaseUrl = process.env.SUPABASE_URL
@@ -117,55 +139,29 @@ export const handler = async (event) => {
     return { statusCode: 405, body: 'Method Not Allowed' }
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY
+  const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey) {
     return {
       statusCode: 500,
       body: JSON.stringify({
         reply:
-          "The assistant isn't fully configured yet — the site owner needs to add an ANTHROPIC_API_KEY in Netlify's environment variables.",
+          "The assistant isn't fully configured yet — the site owner needs to add a GEMINI_API_KEY in Netlify's environment variables.",
       }),
     }
   }
 
   try {
     const { messages } = JSON.parse(event.body)
+    const contents = toGeminiContents(messages)
 
-    const anthropicMessages = messages.map((m) => ({
-      role: m.role === 'assistant' ? 'assistant' : 'user',
-      content: m.content,
-    }))
+    const data = await callGemini(contents, SYSTEM_PROMPT, apiKey)
+    const reply =
+      data.candidates?.[0]?.content?.parts?.find((p) => p.text)?.text ||
+      "Sorry, I didn't catch that — could you rephrase?"
 
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
-        max_tokens: 400,
-        system: SYSTEM_PROMPT,
-        messages: anthropicMessages,
-      }),
-    })
-
-    if (!res.ok) {
-      const errText = await res.text()
-      console.error('Anthropic API error:', errText)
-      return {
-        statusCode: 502,
-        body: JSON.stringify({ reply: "Something went wrong on our end — please try again shortly." }),
-      }
-    }
-
-    const data = await res.json()
-    const reply = data.content?.find((b) => b.type === 'text')?.text || "Sorry, I didn't catch that — could you rephrase?"
-
-    // Fire-and-forget lead extraction — only bother once there's enough conversation to judge intent
-    if (anthropicMessages.length >= 2) {
-      extractAndStoreLead(anthropicMessages, apiKey)
+    // Fire-and-forget lead extraction once there's enough conversation to judge intent
+    if (contents.length >= 2) {
+      extractAndStoreLead(contents, apiKey)
     }
 
     return {
@@ -175,8 +171,8 @@ export const handler = async (event) => {
   } catch (err) {
     console.error(err)
     return {
-      statusCode: 500,
-      body: JSON.stringify({ reply: 'Unexpected error — please try again.' }),
+      statusCode: 502,
+      body: JSON.stringify({ reply: 'Something went wrong on our end — please try again shortly.' }),
     }
   }
 }
