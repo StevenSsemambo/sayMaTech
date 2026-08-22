@@ -1,4 +1,5 @@
 import LogoMark from './Logo'
+import { Link } from 'react-router-dom'
 
 export default function Footer() {
   return (
@@ -12,14 +13,19 @@ export default function Footer() {
         </span>
         <span className="font-mono text-xs tracking-wide">It's Your Tech</span>
         <span>Software for everyday problems, everywhere</span>
-        <a
-          href="https://github.com/StevenSsemambo/"
-          target="_blank"
-          rel="noreferrer"
-          className="focus-ring hover:text-terracotta transition-colors"
-        >
-          GitHub
-        </a>
+        <div className="flex items-center gap-4">
+          <a
+            href="https://github.com/StevenSsemambo/"
+            target="_blank"
+            rel="noreferrer"
+            className="focus-ring hover:text-terracotta transition-colors"
+          >
+            GitHub
+          </a>
+          <Link to="/portal" className="focus-ring text-ivory/30 hover:text-ivory/60 text-xs transition-colors">
+            Portal
+          </Link>
+        </div>
       </div>
     </footer>
   )

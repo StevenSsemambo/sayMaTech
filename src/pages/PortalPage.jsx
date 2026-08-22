@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { Navigate } from 'react-router-dom'
 import { LogOut, FolderKanban, Receipt, Sparkles, ClipboardList } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 import { supabase } from '../lib/supabase'
@@ -211,11 +212,13 @@ function ClientDashboard() {
 }
 
 export default function PortalPage() {
-  const { session, loading } = useAuth()
+  const { session, isAdmin, loading } = useAuth()
 
   if (loading) {
     return <div className="min-h-screen bg-ink flex items-center justify-center text-ivory/50 text-sm pt-20">Loading…</div>
   }
+
+  if (session && isAdmin) return <Navigate to="/admin" replace />
 
   return session ? <ClientDashboard /> : <AuthForm />
 }
