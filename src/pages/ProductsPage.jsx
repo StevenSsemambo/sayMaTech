@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import Products from '../components/Products'
 import AppShowcase from '../components/AppShowcase'
+import PromoBanner from '../components/PromoBanner'
 
 export default function ProductsPage() {
   return (
@@ -33,6 +34,7 @@ export default function ProductsPage() {
           </motion.p>
         </div>
       </section>
+      <PromoBanner />
       <Products showFilters title="Browse the full product line." />
       <AppShowcase />
     </>
