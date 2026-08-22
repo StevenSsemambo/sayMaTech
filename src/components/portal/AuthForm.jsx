@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { supabase } from '../../lib/supabase'
 import LogoMark from '../Logo'
+import BackToSite from './BackToSite'
 
 export default function AuthForm() {
   const [mode, setMode] = useState('login')
@@ -39,6 +40,7 @@ export default function AuthForm() {
 
   return (
     <div className="min-h-screen bg-ink flex items-center justify-center px-6 pt-20">
+      <BackToSite dark />
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}

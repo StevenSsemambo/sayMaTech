@@ -7,6 +7,7 @@ import StatusBadge from '../components/portal/StatusBadge'
 import MessageThread from '../components/portal/MessageThread'
 import NotificationBell from '../components/portal/NotificationBell'
 import SpecAssistant from '../components/portal/SpecAssistant'
+import BackToSite from '../components/portal/BackToSite'
 
 const REQUEST_STATUS_STYLES = {
   pending: 'bg-gold/15 text-gold',
@@ -154,6 +155,7 @@ function ClientDashboard() {
 
   return (
     <div className="min-h-screen bg-ivory pt-24 px-6 pb-16">
+      <BackToSite />
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <div>

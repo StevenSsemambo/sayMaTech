@@ -8,6 +8,7 @@ import MessageThread from '../components/portal/MessageThread'
 import LeadsPanel from '../components/portal/LeadsPanel'
 import RequestsPanel from '../components/portal/RequestsPanel'
 import NotificationBell from '../components/portal/NotificationBell'
+import BackToSite from '../components/portal/BackToSite'
 import { notifyClient } from '../lib/notifications'
 
 const STATUSES = ['discovery', 'in_progress', 'review', 'completed', 'on_hold']
@@ -260,6 +261,7 @@ function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-ivory pt-24 px-6 pb-16">
+      <BackToSite />
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
