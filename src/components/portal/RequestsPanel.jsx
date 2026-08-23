@@ -31,14 +31,41 @@ export default function RequestsPanel({ onApproved }) {
   async function approve(req) {
     setBusyId(req.id)
     try {
-      await supabase.from('projects').insert({
-        client_id: req.client_id,
-        name: req.title,
-        description: req.ai_spec,
-      })
+      const { data: project } = await supabase
+        .from('projects')
+        .insert({
+          client_id: req.client_id,
+          name: req.title,
+          description: req.ai_spec,
+        })
+        .select('id, budget')
+        .single()
+
       await supabase.from('project_requests').update({ status: 'approved' }).eq('id', req.id)
       await notifyClient(req.client_id, 'request_approved', `Your project request "${req.title}" was approved and is now active!`)
       setRequests((rs) => rs.map((r) => (r.id === req.id ? { ...r, status: 'approved' } : r)))
+
+      // Auto-draft an agreement — stays in 'draft' status, only visible to admin until sent
+      if (project) {
+        try {
+          const res = await fetch('/.netlify/functions/generate-agreement', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ projectName: req.title, spec: req.ai_spec, budget: project.budget }),
+          })
+          const data = await res.json()
+          if (data.content) {
+            await supabase.from('agreements').insert({
+              project_id: project.id,
+              client_id: req.client_id,
+              content: data.content,
+            })
+          }
+        } catch (err) {
+          console.error('Agreement draft failed:', err)
+        }
+      }
+
       onApproved?.()
     } finally {
       setBusyId(null)

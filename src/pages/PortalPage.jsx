@@ -8,6 +8,7 @@ import StatusBadge from '../components/portal/StatusBadge'
 import MessageThread from '../components/portal/MessageThread'
 import NotificationBell from '../components/portal/NotificationBell'
 import SpecAssistant from '../components/portal/SpecAssistant'
+import AgreementPanel from '../components/portal/AgreementPanel'
 import BackToSite from '../components/portal/BackToSite'
 
 const REQUEST_STATUS_STYLES = {
@@ -74,7 +75,7 @@ function ProjectsTab() {
       <div className="md:col-span-2 glass-panel-light rounded-2xl p-6 h-[520px] flex flex-col">
         {active && (
           <>
-            <div className="mb-4">
+            <div className="mb-4 overflow-y-auto max-h-64 pr-1">
               <div className="flex items-center justify-between">
                 <h2 className="font-display font-bold text-lg text-ink">{active.name}</h2>
                 <StatusBadge status={active.status} />
@@ -91,6 +92,13 @@ function ProjectsTab() {
                   </span>
                 </div>
               )}
+              <AgreementPanel
+                projectId={active.id}
+                projectName={active.name}
+                projectSpec={active.description}
+                projectBudget={active.budget}
+                clientId={active.client_id}
+              />
             </div>
             <div className="flex-1 min-h-0">
               <MessageThread projectId={active.id} />

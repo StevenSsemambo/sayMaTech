@@ -12,6 +12,7 @@ import InsightsPanel from '../components/portal/InsightsPanel'
 import SupportPanel from '../components/portal/SupportPanel'
 import FaqPanel from '../components/portal/FaqPanel'
 import OverviewPanel from '../components/portal/OverviewPanel'
+import AgreementPanel from '../components/portal/AgreementPanel'
 import NotificationBell from '../components/portal/NotificationBell'
 import BackToSite from '../components/portal/BackToSite'
 import { notifyClient } from '../lib/notifications'
@@ -247,6 +248,13 @@ function ProjectsView() {
                   {active.budget != null && (
                     <p className="text-xs text-ink/40 mt-0.5">Budget: {active.budget}</p>
                   )}
+                  <AgreementPanel
+                    projectId={active.id}
+                    projectName={active.name}
+                    projectSpec={active.description}
+                    projectBudget={active.budget}
+                    clientId={active.client_id}
+                  />
                 </div>
                 <div className="flex-1 min-h-0">
                   <MessageThread projectId={active.id} />
