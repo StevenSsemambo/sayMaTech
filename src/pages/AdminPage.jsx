@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { LogOut, Plus, ShieldAlert, FolderKanban, Sparkles, Receipt, ClipboardList } from 'lucide-react'
+import { LogOut, Plus, ShieldAlert, FolderKanban, Sparkles, Receipt, ClipboardList, Wallet } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 import { supabase } from '../lib/supabase'
 import AuthForm from '../components/portal/AuthForm'
@@ -7,6 +7,7 @@ import StatusBadge from '../components/portal/StatusBadge'
 import MessageThread from '../components/portal/MessageThread'
 import LeadsPanel from '../components/portal/LeadsPanel'
 import RequestsPanel from '../components/portal/RequestsPanel'
+import FinancePanel from '../components/portal/FinancePanel'
 import NotificationBell from '../components/portal/NotificationBell'
 import BackToSite from '../components/portal/BackToSite'
 import { notifyClient } from '../lib/notifications'
@@ -304,11 +305,20 @@ function AdminDashboard() {
           >
             <Sparkles size={14} /> Leads
           </button>
+          <button
+            onClick={() => setTab('finance')}
+            className={`focus-ring flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-md transition-colors ${
+              tab === 'finance' ? 'bg-ink text-ivory' : 'text-ink/60'
+            }`}
+          >
+            <Wallet size={14} /> Finance
+          </button>
         </div>
 
         {tab === 'projects' && <ProjectsView />}
         {tab === 'requests' && <RequestsPanel onApproved={() => setTab('projects')} />}
         {tab === 'leads' && <LeadsPanel />}
+        {tab === 'finance' && <FinancePanel />}
       </div>
     </div>
   )
