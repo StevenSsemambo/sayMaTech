@@ -11,7 +11,7 @@ const STATUS_STYLES = {
 
 function currency(n) {
   if (n == null) return '—'
-  return `UGX ${Number(n).toLocaleString()}`
+  return `$${Number(n).toLocaleString()}`
 }
 
 function StatCard({ icon: Icon, label, value, accent }) {
@@ -104,7 +104,7 @@ export default function FinancePanel() {
           <BarChart data={chartData}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(11,31,26,0.06)" vertical={false} />
             <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#0B1F1A99' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: '#0B1F1A99' }} axisLine={false} tickLine={false} width={70} tickFormatter={(v) => `UGX ${v / 1000}k`} />
+            <YAxis tick={{ fontSize: 11, fill: '#0B1F1A99' }} axisLine={false} tickLine={false} width={70} tickFormatter={(v) => `$${v / 1000}k`} />
             <Tooltip
               formatter={(value) => currency(value)}
               contentStyle={{ borderRadius: 8, border: '1px solid rgba(11,31,26,0.1)', fontSize: 12 }}

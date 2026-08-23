@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { LogOut, Plus, ShieldAlert, FolderKanban, Sparkles, Receipt, ClipboardList, Wallet, BarChart3, LifeBuoy, HelpCircle } from 'lucide-react'
+import { LogOut, Plus, ShieldAlert, FolderKanban, Sparkles, Receipt, ClipboardList, Wallet, BarChart3, LifeBuoy, HelpCircle, LayoutDashboard } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 import { supabase } from '../lib/supabase'
 import AuthForm from '../components/portal/AuthForm'
@@ -11,6 +11,7 @@ import FinancePanel from '../components/portal/FinancePanel'
 import InsightsPanel from '../components/portal/InsightsPanel'
 import SupportPanel from '../components/portal/SupportPanel'
 import FaqPanel from '../components/portal/FaqPanel'
+import OverviewPanel from '../components/portal/OverviewPanel'
 import NotificationBell from '../components/portal/NotificationBell'
 import BackToSite from '../components/portal/BackToSite'
 import { notifyClient } from '../lib/notifications'
@@ -261,7 +262,7 @@ function ProjectsView() {
 
 function AdminDashboard() {
   const { signOut } = useAuth()
-  const [tab, setTab] = useState('projects')
+  const [tab, setTab] = useState('overview')
 
   return (
     <div className="min-h-screen bg-ivory pt-24 px-6 pb-16">
@@ -283,7 +284,15 @@ function AdminDashboard() {
           </div>
         </div>
 
-        <div className="flex gap-2 mb-6 bg-ivory-dim rounded-lg p-1 w-fit">
+        <div className="flex gap-2 mb-6 bg-ivory-dim rounded-lg p-1 w-fit flex-wrap">
+          <button
+            onClick={() => setTab('overview')}
+            className={`focus-ring flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-md transition-colors ${
+              tab === 'overview' ? 'bg-ink text-ivory' : 'text-ink/60'
+            }`}
+          >
+            <LayoutDashboard size={14} /> Overview
+          </button>
           <button
             onClick={() => setTab('projects')}
             className={`focus-ring flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-md transition-colors ${
@@ -342,6 +351,7 @@ function AdminDashboard() {
           </button>
         </div>
 
+        {tab === 'overview' && <OverviewPanel onNavigate={setTab} />}
         {tab === 'projects' && <ProjectsView />}
         {tab === 'requests' && <RequestsPanel onApproved={() => setTab('projects')} />}
         {tab === 'leads' && <LeadsPanel />}

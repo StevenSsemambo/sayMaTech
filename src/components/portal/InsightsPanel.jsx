@@ -4,7 +4,7 @@ import { BarChart3, Users, FileCheck2, Wallet, TrendingUp } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 
 function currency(n) {
-  return `UGX ${Number(n || 0).toLocaleString()}`
+  return `$${Number(n || 0).toLocaleString()}`
 }
 
 function FunnelStat({ icon: Icon, label, value, accent }) {
