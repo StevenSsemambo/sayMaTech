@@ -7,6 +7,7 @@ const links = [
   { href: '/services', label: 'For Businesses' },
   { href: '/products', label: 'Our Products' },
   { href: '/about', label: 'About' },
+  { href: '/faq', label: 'FAQ' },
 ]
 
 export default function Nav() {

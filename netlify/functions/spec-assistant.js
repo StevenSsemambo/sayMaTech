@@ -4,8 +4,29 @@
 //
 // Uses the same Gemini free-tier setup as chat.js. See that file for env var setup.
 
+import { createClient } from '@supabase/supabase-js'
+
 const GEMINI_MODEL = 'gemini-3.6-flash'
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
+
+function getSupabaseCreds() {
+  const url = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL
+  const key = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY
+  if (!url || !key) return null
+  return { url, key }
+}
+
+async function fetchFaqGrounding(supabase) {
+  if (!supabase) return ''
+  try {
+    const { data } = await supabase.from('faq_entries').select('question, answer').limit(30)
+    if (!data || data.length === 0) return ''
+    const lines = data.map((f) => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n')
+    return `\n\nCompany knowledge base — use this as ground truth when relevant:\n${lines}`
+  } catch {
+    return ''
+  }
+}
 
 const SYSTEM_PROMPT = `You are the SayMyTech "Project Spec Assistant" inside the client portal.
 You are talking to a logged-in client who wants to describe a software project in their own
@@ -109,7 +130,11 @@ export const handler = async (event) => {
     }
 
     // Normal conversational turn
-    const data = await callGemini(contents, SYSTEM_PROMPT, apiKey)
+    const creds = getSupabaseCreds()
+    const supabase = creds ? createClient(creds.url, creds.key) : null
+    const systemPrompt = SYSTEM_PROMPT + (await fetchFaqGrounding(supabase))
+
+    const data = await callGemini(contents, systemPrompt, apiKey)
     const reply =
       data.candidates?.[0]?.content?.parts?.find((p) => p.text)?.text ||
       "Could you tell me a bit more about what you have in mind?"

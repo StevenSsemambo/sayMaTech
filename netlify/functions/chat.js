@@ -209,6 +209,18 @@ async function updateCustomerMemory(contents, apiKey, supabase, knownEmail, exis
   }
 }
 
+async function fetchFaqGrounding(supabase) {
+  if (!supabase) return ''
+  try {
+    const { data } = await supabase.from('faq_entries').select('question, answer').limit(30)
+    if (!data || data.length === 0) return ''
+    const lines = data.map((f) => `Q: ${f.question}\nA: ${f.answer}`).join('\n\n')
+    return `\n\nCompany knowledge base — use this as ground truth when relevant, but don't recite it verbatim if a shorter natural answer works:\n${lines}`
+  } catch {
+    return ''
+  }
+}
+
 // ---------- Handler ----------
 
 export const handler = async (event) => {
@@ -238,6 +250,7 @@ export const handler = async (event) => {
     const existingProfile = visitorEmail ? await fetchCustomerMemory(visitorEmail, supabase) : null
 
     let systemPrompt = BASE_SYSTEM_PROMPT
+    systemPrompt += await fetchFaqGrounding(supabase)
     if (existingProfile) {
       systemPrompt += `\n\nThis is a RETURNING visitor you already know. Known profile — name: ${
         existingProfile.name || 'unknown'

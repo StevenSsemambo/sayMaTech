@@ -5,6 +5,7 @@ import ProductsPage from './pages/ProductsPage'
 import ServicesPage from './pages/ServicesPage'
 import AboutPage from './pages/AboutPage'
 import ContactPage from './pages/ContactPage'
+import FaqPage from './pages/FaqPage'
 import PortalPage from './pages/PortalPage'
 import AdminPage from './pages/AdminPage'
 
@@ -17,6 +18,7 @@ export default function App() {
         <Route path="/services" element={<ServicesPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
+        <Route path="/faq" element={<FaqPage />} />
       </Route>
       <Route path="/portal" element={<PortalPage />} />
       <Route path="/admin" element={<AdminPage />} />

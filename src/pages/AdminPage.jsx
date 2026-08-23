@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { LogOut, Plus, ShieldAlert, FolderKanban, Sparkles, Receipt, ClipboardList, Wallet, BarChart3 } from 'lucide-react'
+import { LogOut, Plus, ShieldAlert, FolderKanban, Sparkles, Receipt, ClipboardList, Wallet, BarChart3, LifeBuoy, HelpCircle } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 import { supabase } from '../lib/supabase'
 import AuthForm from '../components/portal/AuthForm'
@@ -9,6 +9,8 @@ import LeadsPanel from '../components/portal/LeadsPanel'
 import RequestsPanel from '../components/portal/RequestsPanel'
 import FinancePanel from '../components/portal/FinancePanel'
 import InsightsPanel from '../components/portal/InsightsPanel'
+import SupportPanel from '../components/portal/SupportPanel'
+import FaqPanel from '../components/portal/FaqPanel'
 import NotificationBell from '../components/portal/NotificationBell'
 import BackToSite from '../components/portal/BackToSite'
 import { notifyClient } from '../lib/notifications'
@@ -322,6 +324,22 @@ function AdminDashboard() {
           >
             <BarChart3 size={14} /> Insights
           </button>
+          <button
+            onClick={() => setTab('support')}
+            className={`focus-ring flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-md transition-colors ${
+              tab === 'support' ? 'bg-ink text-ivory' : 'text-ink/60'
+            }`}
+          >
+            <LifeBuoy size={14} /> Support
+          </button>
+          <button
+            onClick={() => setTab('faq')}
+            className={`focus-ring flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-md transition-colors ${
+              tab === 'faq' ? 'bg-ink text-ivory' : 'text-ink/60'
+            }`}
+          >
+            <HelpCircle size={14} /> FAQ
+          </button>
         </div>
 
         {tab === 'projects' && <ProjectsView />}
@@ -329,6 +347,8 @@ function AdminDashboard() {
         {tab === 'leads' && <LeadsPanel />}
         {tab === 'finance' && <FinancePanel />}
         {tab === 'insights' && <InsightsPanel />}
+        {tab === 'support' && <SupportPanel />}
+        {tab === 'faq' && <FaqPanel />}
       </div>
     </div>
   )

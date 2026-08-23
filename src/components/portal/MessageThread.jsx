@@ -4,6 +4,36 @@ import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/AuthContext'
 import { notifyAdmin, notifyClient } from '../../lib/notifications'
 
+const CATEGORY_LABELS = {
+  billing: 'Billing',
+  technical: 'Technical',
+  feedback: 'Feedback',
+  general: 'General',
+  urgent_issue: 'Urgent issue',
+}
+
+const URGENCY_STYLES = {
+  high: 'text-terracotta',
+  medium: 'text-gold',
+  low: 'text-ink/30',
+}
+
+async function classifyMessage(content, messageId) {
+  try {
+    const res = await fetch('/.netlify/functions/classify-message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content }),
+    })
+    const data = await res.json()
+    if (data.category) {
+      await supabase.from('messages').update({ category: data.category, urgency: data.urgency }).eq('id', messageId)
+    }
+  } catch (err) {
+    console.error('Message classification failed:', err)
+  }
+}
+
 export default function MessageThread({ projectId }) {
   const { user } = useAuth()
   const [messages, setMessages] = useState([])
@@ -22,7 +52,7 @@ export default function MessageThread({ projectId }) {
       const [{ data }, { data: proj }] = await Promise.all([
         supabase
           .from('messages')
-          .select('id, content, image_url, created_at, sender_id, profiles(full_name, role)')
+          .select('id, content, image_url, category, urgency, created_at, sender_id, profiles(full_name, role)')
           .eq('project_id', projectId)
           .order('created_at', { ascending: true }),
         supabase.from('projects').select('client_id, name').eq('id', projectId).single(),
@@ -43,6 +73,13 @@ export default function MessageThread({ projectId }) {
         { event: 'INSERT', schema: 'public', table: 'messages', filter: `project_id=eq.${projectId}` },
         (payload) => {
           setMessages((prev) => [...prev, payload.new])
+        }
+      )
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'messages', filter: `project_id=eq.${projectId}` },
+        (payload) => {
+          setMessages((prev) => prev.map((m) => (m.id === payload.new.id ? { ...m, ...payload.new } : m)))
         }
       )
       .subscribe()
@@ -71,8 +108,17 @@ export default function MessageThread({ projectId }) {
     if (!text.trim()) return
     const content = text
     setText('')
-    await supabase.from('messages').insert({ project_id: projectId, sender_id: user.id, content })
+    const { data: inserted } = await supabase
+      .from('messages')
+      .insert({ project_id: projectId, sender_id: user.id, content })
+      .select('id')
+      .single()
     notifyOtherParty(content.slice(0, 60))
+
+    // Only classify incoming client messages — that's what admin needs to triage
+    if (inserted && user.id === clientId) {
+      classifyMessage(content, inserted.id)
+    }
   }
 
   async function handleFileChange(e) {
@@ -111,21 +157,29 @@ export default function MessageThread({ projectId }) {
           messages.map((m) => {
             const isMine = m.sender_id === user.id
             return (
-              <div
-                key={m.id}
-                className={`max-w-[80%] rounded-xl px-3.5 py-2.5 text-sm leading-relaxed ${
-                  isMine ? 'bg-terracotta text-ivory ml-auto rounded-br-sm' : 'bg-ivory-dim text-ink rounded-bl-sm'
-                }`}
-              >
-                {m.image_url && (
-                  <img
-                    src={m.image_url}
-                    alt="Shared screenshot"
-                    className="rounded-lg mb-1.5 max-h-56 w-full object-cover"
-                    loading="lazy"
-                  />
+              <div key={m.id} className={isMine ? 'ml-auto max-w-[80%]' : 'max-w-[80%]'}>
+                {m.category && !isMine && (
+                  <div className="flex items-center gap-1.5 mb-1 px-1">
+                    <span className={`text-[10px] font-mono uppercase tracking-wide ${URGENCY_STYLES[m.urgency] || 'text-ink/30'}`}>
+                      {CATEGORY_LABELS[m.category] || m.category}
+                    </span>
+                  </div>
                 )}
-                {m.content}
+                <div
+                  className={`rounded-xl px-3.5 py-2.5 text-sm leading-relaxed ${
+                    isMine ? 'bg-terracotta text-ivory rounded-br-sm' : 'bg-ivory-dim text-ink rounded-bl-sm'
+                  }`}
+                >
+                  {m.image_url && (
+                    <img
+                      src={m.image_url}
+                      alt="Shared screenshot"
+                      className="rounded-lg mb-1.5 max-h-56 w-full object-cover"
+                      loading="lazy"
+                    />
+                  )}
+                  {m.content}
+                </div>
               </div>
             )
           })
