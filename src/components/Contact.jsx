@@ -1,15 +1,36 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ArrowRight, Check } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ArrowRight, Check, Sparkles } from 'lucide-react'
+import { supabase } from '../lib/supabase'
+import { notifyAdmin } from '../lib/notifications'
 
 export default function Contact() {
   const [sent, setSent] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState('')
   const [form, setForm] = useState({ name: '', email: '', project: '' })
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Wire this to your email/CRM of choice (Netlify Forms, Formspree, or a function).
-    setSent(true)
+    setError('')
+    setSending(true)
+    try {
+      await supabase.from('leads').insert({
+        name: form.name,
+        email: form.email,
+        summary: form.project,
+        source: 'contact_form',
+        urgency: 'medium',
+      })
+      await notifyAdmin('contact_form', `New contact form message from ${form.name}: ${form.project.slice(0, 80)}`)
+      setSent(true)
+    } catch (err) {
+      console.error(err)
+      setError("Something went wrong sending that — please try again, or use the chat widget instead.")
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -28,6 +49,16 @@ export default function Contact() {
           <p className="mt-4 text-ivory/85 text-lg">
             Tell us what you're trying to build. We'll reply with real next steps, not a sales pitch.
           </p>
+          <div className="mt-4 flex items-center gap-2 text-ivory/70 text-sm">
+            <Sparkles size={14} />
+            <span>
+              Want a more guided experience?{' '}
+              <Link to="/portal" className="underline hover:text-ivory">
+                Sign up at the Client Portal
+              </Link>{' '}
+              instead — our AI will help you organize a full project spec.
+            </span>
+          </div>
         </motion.div>
 
         <AnimatePresence mode="wait">
@@ -96,11 +127,13 @@ export default function Contact() {
                   placeholder="A short description of the idea, timeline, or problem you're solving..."
                 />
               </div>
+              {error && <p className="text-sm text-terracotta">{error}</p>}
               <button
                 type="submit"
-                className="focus-ring justify-self-start inline-flex items-center gap-2 bg-ink hover:bg-ink-soft text-ivory font-medium px-6 py-3.5 rounded-xl transition-colors"
+                disabled={sending}
+                className="focus-ring justify-self-start inline-flex items-center gap-2 bg-ink hover:bg-ink-soft text-ivory font-medium px-6 py-3.5 rounded-xl transition-colors disabled:opacity-50"
               >
-                Send it over <ArrowRight size={18} />
+                {sending ? 'Sending…' : 'Send it over'} <ArrowRight size={18} />
               </button>
             </motion.form>
           )}
