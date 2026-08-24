@@ -3,6 +3,7 @@ import { FileText, Send, Check, Loader2, RefreshCw } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/AuthContext'
 import { notifyClient, notifyAdmin } from '../../lib/notifications'
+import { logAudit } from '../../lib/audit'
 
 export default function AgreementPanel({ projectId, projectName, projectSpec, projectBudget, clientId }) {
   const { user, isAdmin } = useAuth()
@@ -70,6 +71,7 @@ export default function AgreementPanel({ projectId, projectName, projectSpec, pr
     setBusy(true)
     try {
       await supabase.from('agreements').update({ status: 'sent' }).eq('id', agreement.id)
+      logAudit('agreement_sent', 'agreement', agreement.id, projectName)
       await notifyClient(clientId, 'agreement', `A project agreement for "${projectName}" is ready for your review.`, projectId)
       setAgreement((a) => ({ ...a, status: 'sent' }))
     } finally {
@@ -81,6 +83,7 @@ export default function AgreementPanel({ projectId, projectName, projectSpec, pr
     setBusy(true)
     try {
       await supabase.rpc('accept_agreement', { p_agreement_id: agreement.id })
+      logAudit('agreement_accepted', 'agreement', agreement.id, projectName)
       await notifyAdmin('agreement_accepted', `Client accepted the agreement for "${projectName}"`, projectId)
       setAgreement((a) => ({ ...a, status: 'accepted', accepted_at: new Date().toISOString() }))
     } finally {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Navigate } from 'react-router-dom'
-import { LogOut, FolderKanban, Receipt, Sparkles, ClipboardList } from 'lucide-react'
+import { LogOut, FolderKanban, Receipt, Sparkles, ClipboardList, User } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 import { supabase } from '../lib/supabase'
 import AuthForm from '../components/portal/AuthForm'
@@ -9,6 +9,10 @@ import MessageThread from '../components/portal/MessageThread'
 import NotificationBell from '../components/portal/NotificationBell'
 import SpecAssistant from '../components/portal/SpecAssistant'
 import AgreementPanel from '../components/portal/AgreementPanel'
+import MilestonesPanel from '../components/portal/MilestonesPanel'
+import FileGallery from '../components/portal/FileGallery'
+import PrintableInvoice from '../components/portal/PrintableInvoice'
+import AccountSettingsPanel from '../components/portal/AccountSettingsPanel'
 import BackToSite from '../components/portal/BackToSite'
 
 const REQUEST_STATUS_STYLES = {
@@ -72,24 +76,25 @@ function ProjectsTab() {
         ))}
       </div>
 
-      <div className="md:col-span-2 glass-panel-light rounded-2xl p-6 h-[520px] flex flex-col">
+      <div className="md:col-span-2 glass-panel-light rounded-2xl p-6 h-[600px] flex flex-col">
         {active && (
           <>
-            <div className="mb-4 overflow-y-auto max-h-64 pr-1">
+            <div className="mb-4 overflow-y-auto max-h-80 pr-1">
               <div className="flex items-center justify-between">
                 <h2 className="font-display font-bold text-lg text-ink">{active.name}</h2>
                 <StatusBadge status={active.status} />
               </div>
               {active.description && <p className="text-sm text-ink/60 mt-1.5">{active.description}</p>}
               {activeInvoice && (
-                <div className="mt-3 flex items-center gap-2 bg-savanna/10 text-savanna text-xs rounded-lg px-3 py-2 w-fit">
-                  <Receipt size={14} />
-                  <span>
+                <div className="mt-3 flex items-center justify-between gap-2 bg-savanna/10 text-savanna text-xs rounded-lg px-3 py-2">
+                  <span className="flex items-center gap-2">
+                    <Receipt size={14} />
                     {activeInvoice.invoice_number}
-                    {activeInvoice.amount != null && ` — ${activeInvoice.amount}`}
+                    {activeInvoice.amount != null && ` — $${Number(activeInvoice.amount).toLocaleString()}`}
                     {' · '}
                     {activeInvoice.status}
                   </span>
+                  <PrintableInvoice invoice={activeInvoice} projectName={active.name} />
                 </div>
               )}
               <AgreementPanel
@@ -99,6 +104,8 @@ function ProjectsTab() {
                 projectBudget={active.budget}
                 clientId={active.client_id}
               />
+              <MilestonesPanel projectId={active.id} clientId={active.client_id} projectName={active.name} />
+              <FileGallery projectId={active.id} />
             </div>
             <div className="flex-1 min-h-0">
               <MessageThread projectId={active.id} />
@@ -184,7 +191,7 @@ function ClientDashboard() {
           </div>
         </div>
 
-        <div className="flex gap-2 mb-6 bg-ivory-dim rounded-lg p-1 w-fit">
+        <div className="flex gap-2 mb-6 bg-ivory-dim rounded-lg p-1 w-fit flex-wrap">
           <button
             onClick={() => setTab('projects')}
             className={`focus-ring flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-md transition-colors ${
@@ -209,11 +216,20 @@ function ClientDashboard() {
           >
             <ClipboardList size={14} /> My Requests
           </button>
+          <button
+            onClick={() => setTab('account')}
+            className={`focus-ring flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-md transition-colors ${
+              tab === 'account' ? 'bg-ink text-ivory' : 'text-ink/60'
+            }`}
+          >
+            <User size={14} /> Account
+          </button>
         </div>
 
         {tab === 'projects' && <ProjectsTab />}
         {tab === 'new-request' && <SpecAssistant onSubmitted={() => setTab('requests')} />}
         {tab === 'requests' && <RequestsTab />}
+        {tab === 'account' && <AccountSettingsPanel />}
       </div>
     </div>
   )

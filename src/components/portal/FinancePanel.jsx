@@ -2,6 +2,8 @@ import { useState, useEffect, useMemo } from 'react'
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from 'recharts'
 import { Wallet, TrendingUp, Clock, Receipt } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
+import { logAudit } from '../../lib/audit'
+import PrintableInvoice from './PrintableInvoice'
 
 const STATUS_STYLES = {
   unpaid: 'bg-gold/15 text-gold',
@@ -50,6 +52,7 @@ export default function FinancePanel() {
     try {
       const paid_at = status === 'paid' ? new Date().toISOString() : null
       await supabase.from('invoices').update({ status, paid_at }).eq('id', inv.id)
+      logAudit('invoice_status_changed', 'invoice', inv.id, `${inv.invoice_number}: ${inv.status} -> ${status}`)
       setInvoices((is) => is.map((i) => (i.id === inv.id ? { ...i, status, paid_at } : i)))
     } finally {
       setBusyId(null)
@@ -132,6 +135,7 @@ export default function FinancePanel() {
                 </div>
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-mono text-ink">{currency(inv.amount)}</span>
+                  <PrintableInvoice invoice={inv} projectName={inv.projects?.name || 'Project'} />
                   <select
                     value={inv.status}
                     onChange={(e) => updateStatus(inv, e.target.value)}

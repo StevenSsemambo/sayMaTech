@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { LogOut, Plus, ShieldAlert, FolderKanban, Sparkles, Receipt, ClipboardList, Wallet, BarChart3, LifeBuoy, HelpCircle, LayoutDashboard } from 'lucide-react'
+import { LogOut, Plus, ShieldAlert, FolderKanban, Sparkles, Receipt, ClipboardList, Wallet, BarChart3, LifeBuoy, HelpCircle, LayoutDashboard, Users, History, Settings } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 import { supabase } from '../lib/supabase'
+import { logAudit } from '../lib/audit'
 import AuthForm from '../components/portal/AuthForm'
 import StatusBadge from '../components/portal/StatusBadge'
 import MessageThread from '../components/portal/MessageThread'
@@ -13,6 +14,11 @@ import SupportPanel from '../components/portal/SupportPanel'
 import FaqPanel from '../components/portal/FaqPanel'
 import OverviewPanel from '../components/portal/OverviewPanel'
 import AgreementPanel from '../components/portal/AgreementPanel'
+import MilestonesPanel from '../components/portal/MilestonesPanel'
+import FileGallery from '../components/portal/FileGallery'
+import ClientsPanel from '../components/portal/ClientsPanel'
+import AuditLogPanel from '../components/portal/AuditLogPanel'
+import SettingsPanel from '../components/portal/SettingsPanel'
 import NotificationBell from '../components/portal/NotificationBell'
 import BackToSite from '../components/portal/BackToSite'
 import { notifyClient } from '../lib/notifications'
@@ -159,6 +165,7 @@ function ProjectsView() {
     await supabase.from('projects').update({ status }).eq('id', project.id)
     setActive((a) => (a?.id === project.id ? { ...a, status } : a))
     setProjects((ps) => ps.map((p) => (p.id === project.id ? { ...p, status } : p)))
+    logAudit('project_status_changed', 'project', project.id, `${project.name}: ${project.status} -> ${status}`)
 
     notifyClient(
       project.client_id,
@@ -226,10 +233,10 @@ function ProjectsView() {
             ))}
           </div>
 
-          <div className="md:col-span-2 glass-panel-light rounded-2xl p-6 h-[560px] flex flex-col">
+          <div className="md:col-span-2 glass-panel-light rounded-2xl p-6 h-[640px] flex flex-col">
             {active && (
               <>
-                <div className="mb-4">
+                <div className="mb-4 overflow-y-auto max-h-72 pr-1">
                   <div className="flex items-center justify-between flex-wrap gap-2">
                     <h2 className="font-display font-bold text-lg text-ink">{active.name}</h2>
                     <select
@@ -255,6 +262,8 @@ function ProjectsView() {
                     projectBudget={active.budget}
                     clientId={active.client_id}
                   />
+                  <MilestonesPanel projectId={active.id} clientId={active.client_id} projectName={active.name} />
+                  <FileGallery projectId={active.id} />
                 </div>
                 <div className="flex-1 min-h-0">
                   <MessageThread projectId={active.id} />
@@ -357,6 +366,30 @@ function AdminDashboard() {
           >
             <HelpCircle size={14} /> FAQ
           </button>
+          <button
+            onClick={() => setTab('clients')}
+            className={`focus-ring flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-md transition-colors ${
+              tab === 'clients' ? 'bg-ink text-ivory' : 'text-ink/60'
+            }`}
+          >
+            <Users size={14} /> Clients
+          </button>
+          <button
+            onClick={() => setTab('audit')}
+            className={`focus-ring flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-md transition-colors ${
+              tab === 'audit' ? 'bg-ink text-ivory' : 'text-ink/60'
+            }`}
+          >
+            <History size={14} /> Audit
+          </button>
+          <button
+            onClick={() => setTab('settings')}
+            className={`focus-ring flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-md transition-colors ${
+              tab === 'settings' ? 'bg-ink text-ivory' : 'text-ink/60'
+            }`}
+          >
+            <Settings size={14} /> Settings
+          </button>
         </div>
 
         {tab === 'overview' && <OverviewPanel onNavigate={setTab} />}
@@ -367,6 +400,9 @@ function AdminDashboard() {
         {tab === 'insights' && <InsightsPanel />}
         {tab === 'support' && <SupportPanel />}
         {tab === 'faq' && <FaqPanel />}
+        {tab === 'clients' && <ClientsPanel />}
+        {tab === 'audit' && <AuditLogPanel />}
+        {tab === 'settings' && <SettingsPanel />}
       </div>
     </div>
   )

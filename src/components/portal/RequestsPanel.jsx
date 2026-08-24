@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { ClipboardList, Check, X } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 import { notifyClient } from '../../lib/notifications'
+import { logAudit } from '../../lib/audit'
 
 const STATUS_STYLES = {
   pending: 'bg-gold/15 text-gold',
@@ -42,6 +43,7 @@ export default function RequestsPanel({ onApproved }) {
         .single()
 
       await supabase.from('project_requests').update({ status: 'approved' }).eq('id', req.id)
+      logAudit('request_approved', 'project_request', req.id, req.title)
       await notifyClient(req.client_id, 'request_approved', `Your project request "${req.title}" was approved and is now active!`)
       setRequests((rs) => rs.map((r) => (r.id === req.id ? { ...r, status: 'approved' } : r)))
 
@@ -76,6 +78,7 @@ export default function RequestsPanel({ onApproved }) {
     setBusyId(req.id)
     try {
       await supabase.from('project_requests').update({ status: 'declined' }).eq('id', req.id)
+      logAudit('request_declined', 'project_request', req.id, req.title)
       await notifyClient(req.client_id, 'request_declined', `We reviewed your request "${req.title}" — let's chat about it further.`)
       setRequests((rs) => rs.map((r) => (r.id === req.id ? { ...r, status: 'declined' } : r)))
     } finally {
