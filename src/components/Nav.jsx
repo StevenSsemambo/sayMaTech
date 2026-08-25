@@ -7,6 +7,7 @@ const links = [
   { href: '/services', label: 'For Businesses' },
   { href: '/products', label: 'Our Products' },
   { href: '/about', label: 'About' },
+  { href: '/blog', label: 'Blog' },
   { href: '/faq', label: 'FAQ' },
 ]
 
@@ -25,7 +26,7 @@ export default function Nav() {
             <span className="text-[10px] font-mono text-ink/40 tracking-wide">It's Your Tech</span>
           </span>
         </Link>
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden lg:flex items-center gap-6">
           {links.map((l) => (
             <NavLink
               key={l.href}
@@ -53,7 +54,7 @@ export default function Nav() {
           </Link>
         </div>
         <button
-          className="md:hidden text-ink focus-ring"
+          className="lg:hidden text-ink focus-ring"
           onClick={() => setOpen(!open)}
           aria-label={open ? 'Close menu' : 'Open menu'}
           aria-expanded={open}
@@ -62,7 +63,7 @@ export default function Nav() {
         </button>
       </nav>
       {open && (
-        <div className="md:hidden bg-ivory border-t border-ink/10 px-6 py-4 flex flex-col gap-4">
+        <div className="lg:hidden bg-ivory border-t border-ink/10 px-6 py-4 flex flex-col gap-4">
           {links.map((l) => (
             <NavLink
               key={l.href}

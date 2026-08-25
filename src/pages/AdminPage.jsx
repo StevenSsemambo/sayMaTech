@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { LogOut, Plus, ShieldAlert, FolderKanban, Sparkles, Receipt, ClipboardList, Wallet, BarChart3, LifeBuoy, HelpCircle, LayoutDashboard, Users, History, Settings } from 'lucide-react'
+import { LogOut, Plus, ShieldAlert, FolderKanban, Sparkles, Receipt, ClipboardList, Wallet, BarChart3, LifeBuoy, HelpCircle, LayoutDashboard, Users, History, Settings, Newspaper } from 'lucide-react'
 import { useAuth } from '../lib/AuthContext'
 import { supabase } from '../lib/supabase'
 import { logAudit } from '../lib/audit'
@@ -19,6 +19,7 @@ import FileGallery from '../components/portal/FileGallery'
 import ClientsPanel from '../components/portal/ClientsPanel'
 import AuditLogPanel from '../components/portal/AuditLogPanel'
 import SettingsPanel from '../components/portal/SettingsPanel'
+import BlogPanel from '../components/portal/BlogPanel'
 import NotificationBell from '../components/portal/NotificationBell'
 import BackToSite from '../components/portal/BackToSite'
 import { notifyClient } from '../lib/notifications'
@@ -390,6 +391,14 @@ function AdminDashboard() {
           >
             <Settings size={14} /> Settings
           </button>
+          <button
+            onClick={() => setTab('blog')}
+            className={`focus-ring flex items-center gap-1.5 text-sm font-medium px-3.5 py-2 rounded-md transition-colors ${
+              tab === 'blog' ? 'bg-ink text-ivory' : 'text-ink/60'
+            }`}
+          >
+            <Newspaper size={14} /> Blog
+          </button>
         </div>
 
         {tab === 'overview' && <OverviewPanel onNavigate={setTab} />}
@@ -403,6 +412,7 @@ function AdminDashboard() {
         {tab === 'clients' && <ClientsPanel />}
         {tab === 'audit' && <AuditLogPanel />}
         {tab === 'settings' && <SettingsPanel />}
+        {tab === 'blog' && <BlogPanel />}
       </div>
     </div>
   )
