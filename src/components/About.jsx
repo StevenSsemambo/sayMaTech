@@ -50,8 +50,7 @@ export default function About() {
             <p>
               SayMyTech Developers was founded by <strong className="text-ink">Ssemambo Steven</strong>, a
               self-taught software builder and Computer Science graduate of Makerere University's
-              College of Computing and Informatics Technology, where he now also teaches
-              programming as a Lecturing Assistant.
+              College of Computing and Informatics Technology.
             </p>
             <p>
               Every product carries the same starting question: does this actually solve the
