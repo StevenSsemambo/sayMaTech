@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /portal
+
+Sitemap: https://saymytech-developers.netlify.app/sitemap.xml
