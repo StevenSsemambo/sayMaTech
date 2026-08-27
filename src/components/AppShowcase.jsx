@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BookOpen, Stethoscope, Store } from 'lucide-react'
+import { BookOpen, Stethoscope, Store, Wallet, TrendingUp, Sparkles, Flame } from 'lucide-react'
 
 const APPS = [
   {
@@ -39,6 +39,54 @@ const APPS = [
       { src: '/images/screenshots/profitmind-charts.jpg', label: 'Sales insights' },
     ],
   },
+  {
+    id: 'yosacco',
+    name: 'YoSacco',
+    tag: 'Finance',
+    color: '#E8622C',
+    icon: Wallet,
+    screens: [
+      { src: '/images/screenshots/yosacco-home.jpg', label: 'Group dashboard' },
+      { src: '/images/screenshots/yosacco-savings.jpg', label: 'Savings history' },
+      { src: '/images/screenshots/yosacco-charts.jpg', label: 'Insights' },
+    ],
+  },
+  {
+    id: 'yotrade',
+    name: 'YoTrade',
+    tag: 'Finance',
+    color: '#F2B705',
+    icon: TrendingUp,
+    screens: [
+      { src: '/images/screenshots/yotrade-splash.jpg', label: 'Welcome' },
+      { src: '/images/screenshots/yotrade-dashboard.jpg', label: 'Performance dashboard' },
+      { src: '/images/screenshots/yotrade-log.jpg', label: 'Trade log' },
+    ],
+  },
+  {
+    id: 'yoecho',
+    name: 'YoEcho',
+    tag: 'AI Companion',
+    color: '#F2B705',
+    icon: Sparkles,
+    screens: [
+      { src: '/images/screenshots/yoecho-splash.jpg', label: 'Welcome' },
+      { src: '/images/screenshots/yoecho-main.jpg', label: 'Daily reflection' },
+      { src: '/images/screenshots/yoecho-debates.jpg', label: 'Debate mode' },
+    ],
+  },
+  {
+    id: 'gaswatch',
+    name: 'GasWatch Pro',
+    tag: 'IoT',
+    color: '#E8622C',
+    icon: Flame,
+    screens: [
+      { src: '/images/screenshots/gaswatch-dashboard.jpg', label: 'Live dashboard' },
+      { src: '/images/screenshots/gaswatch-analytics.jpg', label: 'Weekly analytics' },
+      { src: '/images/screenshots/gaswatch-device.jpg', label: 'Device setup' },
+    ],
+  },
 ]
 
 export default function AppShowcase() {
@@ -73,7 +121,7 @@ export default function AppShowcase() {
             Actual screens from shipped products. Tap through them.
           </p>
 
-          <div className="mt-8 flex flex-col gap-2">
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-2">
             {APPS.map((app) => {
               const Icon = app.icon
               const isActive = app.id === active
@@ -81,21 +129,21 @@ export default function AppShowcase() {
                 <button
                   key={app.id}
                   onClick={() => setActive(app.id)}
-                  className={`focus-ring flex items-center gap-3 text-left rounded-xl px-4 py-3.5 transition-all ${
+                  className={`focus-ring flex items-center gap-2.5 text-left rounded-xl px-3.5 py-2.5 transition-all ${
                     isActive ? 'bg-ivory/10' : 'hover:bg-ivory/5'
                   }`}
                 >
                   <span
-                    className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0"
+                    className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
                     style={{ backgroundColor: isActive ? app.color : 'rgba(253,248,240,0.08)' }}
                   >
-                    <Icon size={16} className={isActive ? 'text-ivory' : 'text-ivory/50'} />
+                    <Icon size={14} className={isActive ? 'text-ivory' : 'text-ivory/50'} />
                   </span>
-                  <span>
-                    <span className={`block text-sm font-medium ${isActive ? 'text-ivory' : 'text-ivory/60'}`}>
+                  <span className="min-w-0">
+                    <span className={`block text-xs font-medium truncate ${isActive ? 'text-ivory' : 'text-ivory/60'}`}>
                       {app.name}
                     </span>
-                    <span className="block text-[11px] font-mono text-ivory/30">{app.tag}</span>
+                    <span className="block text-[10px] font-mono text-ivory/30">{app.tag}</span>
                   </span>
                 </button>
               )

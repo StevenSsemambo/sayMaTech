@@ -11,6 +11,7 @@ export const products = [
   { name: 'YoRemind', tag: 'Productivity', category: 'Productivity', desc: 'Category-aware reminders for debts, medicine, meetings, and more.' },
   { name: 'Poultry Farm Manager', tag: 'Agriculture', category: 'Business', desc: 'Offline desktop app for managing a poultry farm end to end.' },
   { name: 'YoTrade', tag: 'Finance', category: 'Finance', desc: 'Track and analyze binary options trading performance.' },
+  { name: 'YoEcho', tag: 'AI Companion', category: 'Wellness', desc: 'A reflective AI companion with memory and voice — your wiser self, becoming.' },
 ]
 
 export const categories = ['All', ...Array.from(new Set(products.map((p) => p.category)))]
