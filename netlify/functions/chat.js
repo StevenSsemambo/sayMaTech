@@ -1,21 +1,9 @@
-// Netlify serverless function powering the "Ask SayMyTech" assistant.
-// Calls Google's Gemini API server-side (free tier) so the key never reaches the browser.
-// Also auto-captures/scores leads and maintains a persistent per-customer memory,
-// both in Supabase.
-//
-// SETUP: In Netlify env vars, set:
-//   GEMINI_API_KEY = your key from aistudio.google.com
-//   SUPABASE_URL (or VITE_SUPABASE_URL) = your Supabase project URL
-//   SUPABASE_ANON_KEY (or VITE_SUPABASE_ANON_KEY) = your Supabase anon/publishable key
-//
-// To later switch to the real Claude API, replace callGemini()'s fetch with a call
-// to https://api.anthropic.com/v1/messages — the rest of this file (prompt, lead
-// extraction, memory, response shape) stays the same.
-
 import { createClient } from '@supabase/supabase-js'
 
-const GEMINI_MODEL = 'gemini-3.6-flash'
+const GEMINI_MODEL = 'gemini-2.5-flash'
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
+const GROQ_MODEL = 'llama-3.3-70b-versatile'
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
 const BASE_SYSTEM_PROMPT = `You are the "Ask SayMyTech" assistant on the SayMyTech Developers website.
 
@@ -71,6 +59,18 @@ function toGeminiContents(messages) {
   }))
 }
 
+function toGroqMessages(messages, systemInstruction) {
+  const formatted = [{ role: 'system', content: systemInstruction }]
+  messages.forEach((m) => {
+    formatted.push({
+      role: m.role === 'assistant' ? 'assistant' : 'user',
+      content: m.content,
+    })
+  })
+  return formatted
+}
+
+// Primary Call: Gemini
 async function callGemini(contents, systemInstruction, apiKey, extraConfig = {}) {
   const res = await fetch(`${GEMINI_URL}?key=${apiKey}`, {
     method: 'POST',
@@ -87,6 +87,30 @@ async function callGemini(contents, systemInstruction, apiKey, extraConfig = {})
     throw new Error(`Gemini API error (${res.status}): ${errText}`)
   }
   return res.json()
+}
+
+// Fallback Call: Groq (Llama 3.3 70B)
+async function callGroq(messages, systemInstruction, groqApiKey) {
+  const formattedMessages = toGroqMessages(messages, systemInstruction)
+  const res = await fetch(GROQ_URL, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${groqApiKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages: formattedMessages,
+      max_tokens: 500,
+    }),
+  })
+
+  if (!res.ok) {
+    const errText = await res.text()
+    throw new Error(`Groq API error (${res.status}): ${errText}`)
+  }
+  const data = await res.json()
+  return data.choices?.[0]?.message?.content
 }
 
 // ---------- Lead capture ----------
@@ -229,12 +253,14 @@ export const handler = async (event) => {
   }
 
   const apiKey = process.env.GEMINI_API_KEY
-  if (!apiKey) {
+  const groqApiKey = process.env.GROQ_API_KEY
+
+  if (!apiKey && !groqApiKey) {
     return {
       statusCode: 500,
       body: JSON.stringify({
         reply:
-          "The assistant isn't fully configured yet — the site owner needs to add a GEMINI_API_KEY in Netlify's environment variables.",
+          "The assistant isn't fully configured yet — please configure an API key in Netlify's environment variables.",
       }),
     }
   }
@@ -257,15 +283,36 @@ export const handler = async (event) => {
       }, summary: ${existingProfile.profile_summary}. Use this naturally to personalize your tone and suggestions — don't recite it back verbatim or make it obvious you're reading from a file.`
     }
 
-    const data = await callGemini(contents, systemPrompt, apiKey)
-    const reply =
-      data.candidates?.[0]?.content?.parts?.find((p) => p.text)?.text ||
-      "Sorry, I didn't catch that — could you rephrase?"
+    let reply = null
+
+    // 1. Try Gemini primary
+    if (apiKey) {
+      try {
+        const data = await callGemini(contents, systemPrompt, apiKey)
+        reply = data.candidates?.[0]?.content?.parts?.find((p) => p.text)?.text
+      } catch (geminiErr) {
+        console.warn('Gemini failed or busy, triggering Groq fallback:', geminiErr.message)
+      }
+    }
+
+    // 2. Fall back to Groq if Gemini failed or isn't available
+    if (!reply && groqApiKey) {
+      try {
+        reply = await callGroq(messages, systemPrompt, groqApiKey)
+      } catch (groqErr) {
+        console.error('Groq fallback failed:', groqErr.message)
+      }
+    }
+
+    // Fallback error string if both services fail
+    if (!reply) {
+      reply = "I'm experiencing heavy traffic right now. Please try again in a moment or feel free to reach out via our contact form."
+    }
 
     let capturedEmail = null
 
-    // Fire-and-forget lead + memory extraction once there's enough conversation to judge
-    if (contents.length >= 2) {
+    // Fire-and-forget lead + memory extraction (using Gemini if available)
+    if (contents.length >= 2 && apiKey) {
       extractAndStoreLead(contents, apiKey, supabase)
       capturedEmail = await updateCustomerMemory(contents, apiKey, supabase, visitorEmail, existingProfile)
     }
@@ -279,9 +326,9 @@ export const handler = async (event) => {
       }),
     }
   } catch (err) {
-    console.error(err)
+    console.error('Handler error:', err)
     return {
-      statusCode: 502,
+      statusCode: 200,
       body: JSON.stringify({ reply: 'Something went wrong on our end — please try again shortly.' }),
     }
   }
