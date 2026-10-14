@@ -1,8 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
 
-const GEMINI_MODEL = 'gemini-2.5-flash'
+const GEMINI_MODEL = 'gemini-1.5-flash'
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
-const GROQ_MODEL = 'llama-3.3-70b-versatile'
+const GROQ_MODEL = 'llama-3.1-8b-instant'
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
 
 const BASE_SYSTEM_PROMPT = `You are the "Ask SayMyTech" assistant on the SayMyTech Developers website.
