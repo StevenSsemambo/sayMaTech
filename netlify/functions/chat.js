@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 
-const GEMINI_MODEL = 'gemini-1.5-flash'
+const GEMINI_MODEL = 'gemini-3.8-flash'
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`
 const GROQ_MODEL = 'llama-3.1-8b-instant'
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions'
@@ -138,19 +138,27 @@ const LEAD_EXTRACTION_TOOLS = [
   },
 ]
 
-async function extractAndStoreLead(contents, apiKey, supabase) {
+// Updated extractAndStoreLead to handle Groq fallback:
+async function extractAndStoreLead(contents, messages, systemPrompt, apiKey, groqApiKey, supabase) {
   try {
-    const data = await callGemini(
-      contents,
-      'Analyze this website chat conversation and extract lead information using the extract_lead function. Only mark is_lead true if there is genuine project/hiring interest.',
-      apiKey,
-      { tools: LEAD_EXTRACTION_TOOLS, toolConfig: { functionCallingConfig: { mode: 'ANY', allowedFunctionNames: ['extract_lead'] } } }
-    )
+    let data;
+    if (apiKey) {
+      try {
+        data = await callGemini(
+          contents,
+          'Analyze this website chat conversation and extract lead information using the extract_lead function. Only mark is_lead true if there is genuine project/hiring interest.',
+          apiKey,
+          { tools: LEAD_EXTRACTION_TOOLS, toolConfig: { functionCallingConfig: { mode: 'ANY', allowedFunctionNames: ['extract_lead'] } } }
+        )
+      } catch (e) {
+        console.warn('Gemini lead extraction failed, skipping background lead capture:', e.message)
+      }
+    }
 
-    const part = data.candidates?.[0]?.content?.parts?.find((p) => p.functionCall)
-    if (!part) return
+    const part = data?.candidates?.[0]?.content?.parts?.find((p) => p.functionCall)
+    if (!part || !supabase) return
     const lead = part.functionCall.args
-    if (!lead.is_lead || !supabase) return
+    if (!lead.is_lead) return
 
     await supabase.from('leads').insert({
       name: lead.name || null,
@@ -161,7 +169,7 @@ async function extractAndStoreLead(contents, apiKey, supabase) {
       source: 'chat',
     })
   } catch (err) {
-    console.error('Lead extraction failed:', err)
+    console.error('Lead extraction failed:', err.message)
   }
 }
 
